@@ -1,0 +1,293 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: IBM Plex Mono, monospace
+}
+
+body,
+main {
+  min-height: 100vh
+}
+
+body,
+button {
+  color: #fff
+}
+
+body {
+  margin: 0;
+  background: #000;
+  font-family: IBM Plex Mono, monospace
+}
+
+main,
+.panel {
+  display: flex
+}
+
+main {
+  padding: 40px 20px;
+  align-items: center;
+  justify-content: center
+}
+
+.grid {
+  width: min(960px, 100%);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px
+}
+
+.panel {
+  background: #000;
+  border: 1px solid #6000ff;
+  border-radius: 20px;
+  padding: 24px;
+  flex-direction: column;
+  gap: 16px
+}
+
+.result,
+form {
+  display: flex;
+  flex-direction: column
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-weight: 700;
+  color: #fff
+}
+
+form {
+  gap: 12px;
+  margin-top: 8px
+}
+
+label {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #fff
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #6000ff;
+  background: #000;
+  color: #fff;
+  font-size: 1rem
+}
+
+input:focus {
+  outline: 0;
+  border-color: #f00;
+  box-shadow: 0 0 0 2px #f00
+}
+
+button {
+  border: 1px solid #6000ff;
+  background: #000;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: .95rem;
+  cursor: pointer
+}
+
+button:disabled {
+  opacity: .4;
+  cursor: not-allowed
+}
+
+.status {
+  font-size: .85rem;
+  color: #fff;
+  min-height: 18px
+}
+
+.result {
+  gap: 4px;
+  font-size: .85rem
+}
+
+.actions,
+.link-item header,
+.lis {
+  display: flex;
+  gap: 12px
+}
+
+a,
+a:visited {
+  color: #00ff00;
+  text-decoration: underline
+}
+
+a:hover {
+  color: #00cc00
+}
+
+a:active {
+  color: #00aa00
+}
+
+.lis {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  max-height: min(520px, 60vh);
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #fff #050505
+}
+
+.lis::-webkit-scrollbar {
+  width: 10px
+}
+
+.lis::-webkit-scrollbar-track {
+  background: #050505;
+  border-radius: 8px
+}
+
+.lis::-webkit-scrollbar-thumb {
+  background: #00ff00;
+  border-radius: 8px
+}
+
+.lis::-webkit-scrollbar-thumb:hover {
+  background: #00cc00
+}
+
+details {
+  border: 1px solid #6000ff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  background: #050505;
+  display: flex;
+  flex-direction: column;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding-left: 1.25rem
+}
+
+/* Restore/force a visible disclosure triangle */
+details summary::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #fff;
+}
+
+details[open] summary::before {
+  content: '▾';
+}
+
+.dropcontent {
+  max-height: min(160px, 50vh);
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #fff #050505
+}
+
+.dropcontent::-webkit-scrollbar {
+  width: 8px
+}
+
+.dropcontent::-webkit-scrollbar-track {
+  background: #050505;
+  border-radius: 8px
+}
+
+.dropcontent::-webkit-scrollbar-thumb {
+  background: #00ff00;
+  border-radius: 8px
+}
+
+.dropcontent::-webkit-scrollbar-thumb:hover {
+  background: #00cc00
+}
+
+.link-item {
+  border: 1px solid #6000ff;
+  border-radius: 14px;
+  padding: 14px;
+  background: #000
+}
+
+.link-item header {
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap
+}
+
+.link-item small,
+.link-item strong {
+  display: block;
+  color: #fff
+}
+
+.actions {
+  justify-content: space-between;
+  align-items: center
+}
+
+#refr {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #6000ff;
+  background: #000
+}
+
+#refr svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  fill: #fff
+}
+
+.countdown {
+  font-size: .78rem;
+  color: #0f0;
+  margin-top: 4px
+}
+
+.countdown.expired {
+  color: #f00
+}
+
+.report {
+  font-size: .8rem
+}
+
+.summary-link {
+  color: #fff;
+  text-decoration: underline;
+  display: none;
+}
+
+details[open] > summary .summary-link {
+  display: inline;
+}
