@@ -34,6 +34,11 @@ export default {
         rewritten.pathname = '/home.html';
         return env.ASSETS.fetch(new Request(rewritten.toString(), request));
       }
+      if (url.pathname === '/home') {
+        const rewritten = new URL(url.toString());
+        rewritten.pathname = '/home.html';
+        return env.ASSETS.fetch(new Request(rewritten.toString(), request));
+      }
       if (url.pathname === '/privacy') {
         const rewritten = new URL(url.toString());
         rewritten.pathname = '/privacy.html';
@@ -42,6 +47,11 @@ export default {
       if (url.pathname === '/rules') {
         const rewritten = new URL(url.toString());
         rewritten.pathname = '/rules.html';
+        return env.ASSETS.fetch(new Request(rewritten.toString(), request));
+      }
+      if (url.pathname === '/release_notes') {
+        const rewritten = new URL(url.toString());
+        rewritten.pathname = '/release_notes.html';
         return env.ASSETS.fetch(new Request(rewritten.toString(), request));
       }
 
