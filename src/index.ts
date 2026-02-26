@@ -3,7 +3,7 @@ import { handleRedirect } from './handlers/redirect';
 import { corsHeaders, jsonError } from './responses';
 import { getClientIp, normalizeSlug } from './utils';
 import { Env } from './types';
-import { isBlacklisted } from './blacklist';
+import { getBlockStatus, duringTempBlockRequest, hasCooldown, onRateLimited, setCooldown, getDailyCount, incrementDailyCount } from './rate_limit';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -12,6 +12,20 @@ export default {
 
     if (request.method === 'OPTIONS' && url.pathname.startsWith('/i/')) {
       return new Response(null, { headers: corsHeaders() });
+    }
+
+    if (url.pathname.startsWith('/i/')) {
+      const bl = await getBlockStatus(env, clientIp);
+      if (bl.status === 'perm') {
+        return jsonError('Forbidden', 403);
+      }
+      if (bl.status === 'temp') {
+        const escalated = await duringTempBlockRequest(env, clientIp);
+        if (escalated === 'perm_blocked') {
+          return jsonError('Forbidden', 403);
+        }
+        return jsonError('Temporarily blocked', 403);
+      }
     }
 
     if (request.method === 'GET') {
@@ -38,23 +52,29 @@ export default {
     }
 
     if (url.pathname === '/i/rules' && request.method === 'POST') {
-      if (await isBlacklisted(env, clientIp)) {
-        return jsonError('Forbidden', 403);
+      if (await hasCooldown(env, clientIp)) {
+        await onRateLimited(env, clientIp);
+        return jsonError('Too many requests, wait 20s', 429);
       }
-      return handleCreateLink(request, env, url);
+      const daily = await getDailyCount(env, clientIp);
+      if (daily >= 20) {
+        await onRateLimited(env, clientIp);
+        return jsonError('Daily limit reached (20)', 429);
+      }
+
+      const resp = await handleCreateLink(request, env, url);
+      if (resp.ok) {
+        await setCooldown(env, clientIp, 20);
+        await incrementDailyCount(env, clientIp);
+      }
+      return resp;
     }
 
     if (url.pathname === '/i/mine' && request.method === 'GET') {
-      if (await isBlacklisted(env, clientIp)) {
-        return jsonError('Forbidden', 403);
-      }
       return handleListLinks(request, env, url);
     }
 
     if (url.pathname.startsWith('/i/rules/') && request.method === 'DELETE') {
-      if (await isBlacklisted(env, clientIp)) {
-        return jsonError('Forbidden', 403);
-      }
       const slugPart = url.pathname.replace('/i/rules/', '');
       const slug = normalizeSlug(slugPart);
       if (!slug) {
