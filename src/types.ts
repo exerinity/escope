@@ -14,4 +14,5 @@ export interface RedirectSummary {
   slug: string;
   target: string;
   expiresAt: number;
+  createdAt: number;
 }
