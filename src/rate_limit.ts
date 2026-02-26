@@ -84,12 +84,21 @@ export async function onRateLimited(env: Env, ip: string): Promise<'none' | 'tem
 }
 
 export async function hasCooldown(env: Env, ip: string): Promise<boolean> {
-  const v = await env.REDIRECTS.get(KEY_CD(ip));
-  return !!v;
+  const raw = await env.REDIRECTS.get(KEY_CD(ip));
+  if (!raw) return false;
+  try {
+    const obj = JSON.parse(raw) as { t: number };
+    if (Date.now() < obj.t) return true;
+    await env.REDIRECTS.delete(KEY_CD(ip));
+    return false;
+  } catch {
+    return true;
+  }
 }
 
 export async function setCooldown(env: Env, ip: string, seconds = 20): Promise<void> {
-  await env.REDIRECTS.put(KEY_CD(ip), '1', { expirationTtl: seconds });
+  const expireAt = Date.now() + seconds * 1000;
+  await env.REDIRECTS.put(KEY_CD(ip), JSON.stringify({ t: expireAt }), { expirationTtl: 60 });
 }
 
 export async function getDailyCount(env: Env, ip: string): Promise<number> {
@@ -107,4 +116,3 @@ export async function incrementDailyCount(env: Env, ip: string): Promise<number>
   await env.REDIRECTS.put(key, String(next), { expiration: Math.floor(Date.now() / 1000) + ttlSec });
   return next;
 }
-
