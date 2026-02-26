@@ -1,6 +1,6 @@
 import { IP_KEY_PREFIX, SLUG_ATTEMPTS, SLUG_KEY_PREFIX } from './constants';
 import { RedirectSummary, Env, StoredRedirect } from './types';
-import { randomSlug } from './utils';
+import { randomSlug, SlugMode } from './utils';
 
 interface IpEntry {
   slugs: string[];
@@ -9,9 +9,9 @@ interface IpEntry {
 const slugKey = (slug: string) => `${SLUG_KEY_PREFIX}${slug}`;
 const ipKey = (ip: string) => `${IP_KEY_PREFIX}${ip}`;
 
-export async function generateUniqueSlug(store: KVNamespace): Promise<string> {
+export async function generateUniqueSlug(store: KVNamespace, mode: SlugMode = 'alphanumeric'): Promise<string> {
   for (let attempt = 0; attempt < SLUG_ATTEMPTS; attempt++) {
-    const slug = randomSlug();
+    const slug = randomSlug(mode);
     const existing = await store.get(slugKey(slug));
     if (!existing) {
       return slug;
@@ -73,6 +73,7 @@ export async function listActiveRedirects(env: Env, ip: string): Promise<Redirec
       slug,
       target: record.target,
       expiresAt: record.expiresAt,
+      createdAt: record.createdAt,
     });
   }
 
