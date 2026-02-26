@@ -6,8 +6,10 @@
     l = document.getElementById("lis"),
     a = document.getElementById("lit"),
     i = document.getElementById("refr"),
+    m = document.getElementById("dall"),
     o = null,
-    s = [];
+    s = [],
+    g = [];
   function d(e, t) { e.textContent = t }
   function c() {
     let e = Date.now();
@@ -21,11 +23,12 @@
     })
   }
   async function p() {
-    d(a, "checking..."), l.innerHTML = "", i.disabled = !0, o && (clearInterval(o), o = null), s = [];
+    d(a, "checking..."), l.innerHTML = "", i.disabled = !0, m && (m.style.display = "none", m.disabled = !0, m.textContent = "destroy all"), o && (clearInterval(o), o = null), s = [], g = [];
     try {
       let e = await fetch("/i/mine"), t = await e.json();
       if (!e.ok) throw Error(t.error || "load failed");
       if (!t.links.length) { d(a, "none"); return }
+      g = t.links.map(x => x.slug);
       d(a, ""), t.links.forEach(e => l.appendChild(function e(t) {
         let n = document.createElement("li"); n.className = "link-item";
         let r = document.createElement("header"), l = document.createElement("div"); l.style.flex = "1";
@@ -37,7 +40,7 @@
         l.appendChild(a), l.appendChild(o), l.appendChild(d), l.appendChild(c);
         let p = document.createElement("button");
         return p.type = "button", p.textContent = "destroy", p.style.backgroundColor = "RED", p.addEventListener("click", () => { if (confirm("Are you sure?")) u(t.slug, p) }), r.appendChild(l), r.appendChild(p), n.appendChild(r), n
-      }(e))), o && (clearInterval(o), o = null), s.length && (c(), o = setInterval(c, 1e3))
+      }(e))), t.links.length > 3 && m && (m.style.display = "inline-flex", m.disabled = !1), o && (clearInterval(o), o = null), s.length && (c(), o = setInterval(c, 1e3))
     } catch (n) { console.error(n), d(a, "error") } finally { i.disabled = !1 }
   }
   async function u(e, t) {
@@ -56,6 +59,20 @@
       let s = new Date(o.expiresAt).toLocaleString();
       n.innerHTML = '<span>scope: <a href="' + o.redirectUrl + '">' + o.redirectUrl + "</a></span><span>expires: " + s + "</span>", await p(), e.reset(), e.ttl.value = "5"
     } catch (c) { console.error(c), d(t, "error") } finally { r.disabled = !1 }
-  }), i.addEventListener("click", () => { p() }), p()
+  }), i.addEventListener("click", () => { p() }), m && m.addEventListener("click", async () => {
+    if (!g.length) return;
+    if (!confirm(`Destroy all ${g.length} scopes?`)) return;
+    m.disabled = !0; const orig = m.textContent; m.textContent = "destroying...";
+    try {
+      for (const slug of g) {
+        try {
+          const r = await fetch("/i/rules/" + slug, { method: "DELETE" });
+          await r.json();
+        } catch { /* noop */ }
+      }
+      await p();
+    } finally {
+      m.textContent = orig; m.disabled = !1;
+    }
+  }), p()
 }();
-
