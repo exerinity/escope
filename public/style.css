@@ -75,6 +75,25 @@ label {
   color: #fff
 }
 
+label[for="remember-slug-mode"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+#remember-slug-mode {
+  width: 18px;
+  height: 18px;
+  accent-color: #6000ff;
+}
+
+#remember-slug-mode:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px #f00;
+  border-radius: 4px;
+}
+
 input {
   width: 100%;
   padding: 12px 14px;
@@ -89,6 +108,22 @@ input:focus {
   outline: 0;
   border-color: #f00;
   box-shadow: 0 0 0 2px #f00
+}
+
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #6000ff;
+  background: #000;
+  color: #fff;
+  font-size: 1rem;
+}
+
+select:focus {
+  outline: 0;
+  border-color: #f00;
+  box-shadow: 0 0 0 2px #f00;
 }
 
 button {
@@ -123,10 +158,12 @@ button:disabled {
   gap: 12px
 }
 
-a,
-a:visited {
-  color: #00ff00;
-  text-decoration: underline
+.report {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #fff;
+  text-decoration: underline dashed;
 }
 
 a:hover {
@@ -187,7 +224,6 @@ details summary {
   padding-left: 1.25rem
 }
 
-/* Restore/force a visible disclosure triangle */
 details summary::before {
   content: '▸';
   position: absolute;
@@ -233,10 +269,27 @@ details[open] summary::before {
   background: #000
 }
 
+.link-item.flash {
+  animation: flashCard 700ms ease-in-out;
+}
+
+@keyframes flashCard {
+  0% { box-shadow: 0 0 0 0 rgba(0,255,0,0.8), inset 0 0 0 0 rgba(0,255,0,0.15); }
+  50% { box-shadow: 0 0 0 6px rgba(0,255,0,0.2), inset 0 0 0 9999px rgba(0,255,0,0.04); }
+  100% { box-shadow: 0 0 0 0 rgba(0,255,0,0), inset 0 0 0 0 rgba(0,255,0,0); }
+}
+
 .link-item header {
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap
+}
+
+.link-item header button {
+  padding: 8px 12px;
+  font-size: .85rem;
+  border-radius: 10px;
+  line-height: 1.1;
 }
 
 .link-item small,
@@ -278,16 +331,12 @@ details[open] summary::before {
   color: #f00
 }
 
-.report {
-  font-size: .8rem
-}
-
 .summary-link {
   color: #fff;
   text-decoration: underline;
   display: none;
 }
 
-details[open] > summary .summary-link {
+details[open]>summary .summary-link {
   display: inline;
 }
