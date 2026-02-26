@@ -1,0 +1,12 @@
+name = "escope"
+main = "src/index.ts"
+compatibility_date = "2024-05-02"
+
+[[kv_namespaces]]
+binding = "REDIRECTS"
+id = "e00f8141433648cba330087fd7295247"
+preview_id = "9c5a6d9ec9be4ecd8a21d78fcf199a5d"
+
+[assets]
+directory = "public"
+binding = "ASSETS"
