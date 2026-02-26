@@ -54,7 +54,7 @@ export default {
     if (url.pathname === '/i/rules' && request.method === 'POST') {
       if (await hasCooldown(env, clientIp)) {
         await onRateLimited(env, clientIp);
-        return jsonError('Too many requests, wait 20s', 429);
+        return jsonError('Too many requests, wait 5s', 429);
       }
       const daily = await getDailyCount(env, clientIp);
       if (daily >= 20) {
@@ -64,7 +64,7 @@ export default {
 
       const resp = await handleCreateLink(request, env, url);
       if (resp.ok) {
-        await setCooldown(env, clientIp, 20);
+        await setCooldown(env, clientIp, 5);
         await incrementDailyCount(env, clientIp);
       }
       return resp;
