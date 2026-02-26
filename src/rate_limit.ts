@@ -96,7 +96,7 @@ export async function hasCooldown(env: Env, ip: string): Promise<boolean> {
   }
 }
 
-export async function setCooldown(env: Env, ip: string, seconds = 20): Promise<void> {
+export async function setCooldown(env: Env, ip: string, seconds = 5): Promise<void> {
   const expireAt = Date.now() + seconds * 1000;
   await env.REDIRECTS.put(KEY_CD(ip), JSON.stringify({ t: expireAt }), { expirationTtl: 60 });
 }
