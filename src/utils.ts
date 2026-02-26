@@ -1,4 +1,6 @@
 import { SLUG_LENGTH } from './constants';
+import { WORDS } from './words';
+import { ICONS } from './icons';
 
 export async function parseJsonBody<T>(request: Request): Promise<T | null> {
   try {
@@ -21,26 +23,86 @@ export function normalizeUrl(value: string): string | null {
 }
 
 export function normalizeSlug(pathname: string): string | null {
-  const trimmed = pathname.replace(/^\/+|\/+$/g, '');
-  if (!trimmed) {
+  const raw = pathname.replace(/^\/+|\/+$/g, '');
+  if (!raw) {
     return null;
   }
 
-  if (!/^[a-z0-9]+$/i.test(trimmed)) {
-    return null;
+  let trimmed = raw;
+  try {
+    trimmed = decodeURIComponent(raw);
+  } catch {
   }
 
-  return trimmed.toLowerCase();
+  if (/^[a-z0-9]+$/i.test(trimmed)) {
+    return trimmed.toLowerCase();
+  }
+
+  const ICON_SET = new Set(ICONS);
+  for (const ch of trimmed) {
+    if (!ICON_SET.has(ch)) {
+      return null;
+    }
+  }
+  return trimmed;
 }
 
-export function randomSlug(): string {
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let slug = '';
-  const bytes = crypto.getRandomValues(new Uint8Array(SLUG_LENGTH));
-  for (const byte of bytes) {
-    slug += alphabet[byte % alphabet.length];
+export type SlugMode = 'letters' | 'numbers' | 'alphanumeric' | 'words' | 'icons';
+
+function randomFromAlphabet(length: number, alphabet: string): string {
+  let out = '';
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  for (const b of bytes) {
+    out += alphabet[b % alphabet.length];
   }
-  return slug;
+  return out;
+}
+
+function randomWordsSlug(): string {
+  let out = '';
+  if (!WORDS.length) {
+    return randomFromAlphabet(SLUG_LENGTH, 'abcdefghijklmnopqrstuvwxyz');
+  }
+  while (out.length < SLUG_LENGTH) {
+    const idx = crypto.getRandomValues(new Uint16Array(1))[0] % WORDS.length;
+    const w = WORDS[idx];
+    const cleaned = w.replace(/[^a-z]/g, '');
+    if (!cleaned) continue;
+    out += cleaned;
+  }
+  return out.slice(0, SLUG_LENGTH);
+}
+
+export function randomSlug(mode: SlugMode = 'alphanumeric'): string {
+  switch (mode) {
+    case 'letters':
+      return randomFromAlphabet(SLUG_LENGTH, 'abcdefghijklmnopqrstuvwxyz');
+    case 'numbers':
+      return randomFromAlphabet(SLUG_LENGTH, '0123456789');
+    case 'words':
+      return randomWordsSlug();
+    case 'icons': {
+      let out = '';
+      const picks = Math.max(1, SLUG_LENGTH);
+      for (let i = 0; i < picks; i++) {
+        const idx = crypto.getRandomValues(new Uint16Array(1))[0] % ICONS.length;
+        out += ICONS[idx];
+      }
+      return out;
+    }
+    case 'alphanumeric':
+    default:
+      return randomFromAlphabet(SLUG_LENGTH, 'abcdefghijklmnopqrstuvwxyz0123456789');
+  }
+}
+
+export function normalizeSlugMode(value: unknown): SlugMode | null {
+  if (typeof value !== 'string') return null;
+  const v = value.toLowerCase();
+  if (v === 'letters' || v === 'numbers' || v === 'alphanumeric' || v === 'words' || v === 'icons') {
+    return v;
+  }
+  return null;
 }
 
 export function getClientIp(request: Request): string {
