@@ -1,12 +1,13 @@
 import { MIN_TTL_MINUTES, MAX_TTL_MINUTES } from '../constants';
 import { Env } from '../types';
-import { getClientIp, normalizeUrl, parseJsonBody } from '../utils';
+import { getClientIp, normalizeUrl, normalizeSlugMode, parseJsonBody, SlugMode } from '../utils';
 import { jsonError, jsonResponse } from '../responses';
 import { deleteRedirect, generateUniqueSlug, getRedirect, listActiveRedirects, saveRedirect } from '../storage';
 
 interface CreatePayload {
   url: string;
   ttlMinutes: number;
+  slugMode?: string;
 }
 
 export async function handleCreateLink(request: Request, env: Env, baseUrl: URL): Promise<Response> {
@@ -45,10 +46,13 @@ export async function handleCreateLink(request: Request, env: Env, baseUrl: URL)
     return jsonError(`Expiration must be between ${MIN_TTL_MINUTES} and ${MAX_TTL_MINUTES} minutes`, 400);
   }
 
+  const modeRaw = normalizeSlugMode(payload.slugMode);
+  const slugMode: SlugMode = modeRaw ?? 'alphanumeric';
+
   const ownerIp = getClientIp(request);
   const now = Date.now();
   const expiresAt = now + ttlMinutes * 60 * 1000;
-  const slug = await generateUniqueSlug(env.REDIRECTS);
+  const slug = await generateUniqueSlug(env.REDIRECTS, slugMode);
 
   await saveRedirect(env, slug, {
     target: normalizedUrl,
@@ -61,6 +65,7 @@ export async function handleCreateLink(request: Request, env: Env, baseUrl: URL)
     slug,
     redirectUrl: `${baseUrl.origin}/${slug}`,
     expiresAt,
+    createdAt: now,
   });
 }
 
