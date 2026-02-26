@@ -6,7 +6,7 @@ import { Env } from './types';
 import { getBlockStatus, duringTempBlockRequest, hasCooldown, onRateLimited, setCooldown, getDailyCount, incrementDailyCount } from './rate_limit';
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const clientIp = getClientIp(request);
 
@@ -72,7 +72,7 @@ export default {
         return jsonError('Daily limit reached (20)', 429);
       }
 
-      const resp = await handleCreateLink(request, env, url);
+      const resp = await handleCreateLink(request, env, url, ctx);
       if (resp.ok) {
         await setCooldown(env, clientIp, 5);
         await incrementDailyCount(env, clientIp);

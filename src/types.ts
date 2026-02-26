@@ -1,6 +1,7 @@
 export interface Env {
   REDIRECTS: KVNamespace;
   ASSETS: Fetcher;
+  DISCORD_WEBHOOK_URL?: string;
 }
 
 export interface StoredRedirect {
