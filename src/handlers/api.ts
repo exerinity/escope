@@ -27,6 +27,16 @@ export async function handleCreateLink(request: Request, env: Env, baseUrl: URL)
     return jsonError('Destination URL must include http:// or https://', 400);
   }
 
+  const lowerUrl = normalizedUrl.toLowerCase();
+  const blockedTargets = [
+    'escp.lol',
+    'escope.exerinity.com',
+    'escope.exerinity.workers.dev',
+  ];
+  if (blockedTargets.some((b) => lowerUrl.includes(b))) {
+    return jsonError('Appreciate the enthusiasm, but you cannot create a scope leading to escope or another scope', 400);
+  }
+
   if (!Number.isFinite(ttlMinutes)) {
     return jsonError('Expiration must be a number', 400);
   }
@@ -72,7 +82,7 @@ export async function handleDeleteLink(request: Request, env: Env, slug: string)
   }
 
   if (record.ownerIp !== ownerIp) {
-    return jsonError('You can only cancel links you created from this address.', 403);
+    return jsonError('You did not make this one, buddy.', 403);
   }
 
   await deleteRedirect(env, slug, record);

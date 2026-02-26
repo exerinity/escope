@@ -24,8 +24,8 @@
 <body>
   <main>
     <div class="grid">
-      <section class="panel">
-        <h1>Welcome to escope</h1>
+      <section class="panel"><small>Welcome to</small>
+        <h1><span style="color: #6000ff">$</span> escope</h1>
         <p>
           escope is a service for creating ephemeral, quick, self-destructing redirects ("scopes").
         </p>
@@ -38,10 +38,10 @@
 
           <button type="submit" id="create-button">Create scope</button>
         </form>
-        <div class="stat" id="stat"></div>
+        <div class="status" id="stat"></div>
         <div class="result" id="result"></div>
         <details>
-          <summary>More</summary>
+          <summary>More about escope</summary>
           <div class="dropcontent">escope is a Cloudflare Worker, made with TypeScript. Scopes can last from 1 minute to
             3 days (4320 minutes)
             but
@@ -50,7 +50,7 @@
           </div>
         </details>
         <details class="rules">
-          <summary><span>escope rules</span><a class="summary-link" href="/rules" target="_blank"
+          <summary><span>The escope rules</span><a class="summary-link" href="/rules" target="_blank"
               rel="noopener noreferrer">Open in new tab</a></summary>
           <div class="dropcontent">
             <h3>No extreme NSFW</h3>

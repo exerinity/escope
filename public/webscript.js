@@ -54,8 +54,10 @@
     l.preventDefault(), d(t, "creating..."), n.textContent = "", r.disabled = !0;
     let a = { url: e.url.value, ttlMinutes: Number(e.ttl.value) };
     try {
-      let i = await fetch("/i/rules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) }), o = await i.json();
-      if (!i.ok) throw Error(o.error || "create failed"); d(t, "done");
+      let i = await fetch("/i/rules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
+      let o = await i.json();
+      if (!i.ok) { d(t, o.error || "create failed"); return }
+      d(t, "done");
       let s = new Date(o.expiresAt).toLocaleString();
       n.innerHTML = '<span>scope: <a href="' + o.redirectUrl + '">' + o.redirectUrl + "</a></span><span>expires: " + s + "</span>", await p(), e.reset(), e.ttl.value = "5"
     } catch (c) { console.error(c), d(t, "error") } finally { r.disabled = !1 }
