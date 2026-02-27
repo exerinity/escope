@@ -69,6 +69,7 @@
     });
   }
   function d(e, t) { e.textContent = t }
+  function h(e) { e.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span>'; }
   function c() {
     let e = Date.now();
     s.forEach(t => {
@@ -81,7 +82,7 @@
     })
   }
   async function p() {
-    d(a, "checking..."), l.innerHTML = "", i.disabled = !0, m && (m.style.display = "none", m.disabled = !0, m.textContent = "destroy all"), o && (clearInterval(o), o = null), s = [], g = [];
+    h(a), l.innerHTML = "", i.disabled = !0, m && (m.style.display = "none", m.disabled = !0, m.textContent = "destroy all"), o && (clearInterval(o), o = null), s = [], g = [];
     try {
       let e = await fetch("/i/mine"), t = await e.json();
       if (!e.ok) throw Error(t.error || "load failed");
@@ -133,14 +134,14 @@
     } catch (n) { console.error(n), d(a, "error") } finally { i.disabled = !1 }
   }
   async function u(e, t) {
-    t.disabled = !0; let n = t.textContent; t.textContent = "destroying...";
+    t.disabled = !0; let n = t.innerHTML; t.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span>';
     try {
       let r = await fetch("/i/rules/" + e, { method: "DELETE" }), l = await r.json();
       if (!r.ok) throw Error(l.error || "destroy failed"); await p()
-    } catch (i) { console.error(i), d(a, "error") } finally { t.disabled = !1, t.textContent = n }
+    } catch (i) { console.error(i), d(a, "error") } finally { t.disabled = !1, t.innerHTML = n }
   }
   e.addEventListener("submit", async l => {
-    l.preventDefault(), d(t, "creating..."), r.disabled = !0;
+    l.preventDefault(), h(t), r.disabled = !0;
     let a = { url: e.url.value, ttlMinutes: Number(e.ttl.value), slugMode: e.slugMode && e.slugMode.value ? e.slugMode.value : 'alphanumeric' };
     try { if (z && z.checked && VM.has(a.slugMode)) localStorage.setItem(MODE_KEY, a.slugMode); } catch {}
     try {
@@ -158,7 +159,7 @@
   }), i.addEventListener("click", () => { p() }), m && m.addEventListener("click", async () => {
     if (!g.length) return;
     if (!confirm(`Destroy all ${g.length} scopes?`)) return;
-    m.disabled = !0; const orig = m.textContent; m.textContent = "destroying...";
+    m.disabled = !0; const orig = m.innerHTML; m.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span>';
     try {
       for (const slug of g) {
         try {
@@ -168,7 +169,7 @@
       }
       await p();
     } finally {
-      m.textContent = orig; m.disabled = !1;
+      m.innerHTML = orig; m.disabled = !1;
     }
   }), p()
 }();
