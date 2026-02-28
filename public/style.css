@@ -41,14 +41,22 @@ main {
   gap: 24px
 }
 
+.grid > .panel:last-child {
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+}
+
 .panel {
   background: #000;
   border: 1px solid #6000ff;
   border-radius: 20px;
   padding: 24px;
   flex-direction: column;
-  gap: 16px
+  gap: 16px;
+  min-height: 0
 }
+
+.grid { align-items: stretch; }
 
 .result,
 form {
@@ -179,8 +187,8 @@ a:active {
   margin: 0;
   padding: 0;
   flex-direction: column;
-  max-height: min(520px, 60vh);
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   padding-right: 8px;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
@@ -301,6 +309,13 @@ details[open] summary::before {
 .actions {
   justify-content: space-between;
   align-items: center
+}
+
+#dall {
+  padding: 8px 12px;
+  font-size: .85rem;
+  border-radius: 10px;
+  line-height: 1.1;
 }
 
 #refr {
