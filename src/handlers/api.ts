@@ -87,9 +87,9 @@ export async function handleCreateLink(request: Request, env: Env, baseUrl: URL,
 
   return jsonResponse({
     slug,
-    redirectUrl: `${baseUrl.origin}/${slug}`,
-    expiresAt,
-    createdAt: now,
+    scope: `${baseUrl.origin}/${slug}`,
+    finish: expiresAt,
+    made: now,
   });
 }
 
@@ -97,8 +97,11 @@ export async function handleListLinks(request: Request, env: Env, baseUrl: URL):
   const ownerIp = getClientIp(request);
   const links = await listActiveRedirects(env, ownerIp);
   const payload = links.map((link) => ({
-    ...link,
-    redirectUrl: `${baseUrl.origin}/${link.slug}`,
+    slug: link.slug,
+    target: link.target,
+    finish: link.expiresAt,
+    made: link.createdAt,
+    scope: `${baseUrl.origin}/${link.slug}`,
   }));
   return jsonResponse({ links: payload });
 }
