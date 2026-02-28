@@ -69,7 +69,13 @@
     });
   }
   function d(e, t) { e.textContent = t }
-  function h(e) { e.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span>'; }
+  function _tr(u, m = 25) {
+    try {
+      if (!u || typeof u !== 'string') return '';
+      return u.length > m ? u.slice(0, m) + '...' : u;
+    } catch { return String(u); }
+  }
+  function h(e) { e.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> Retrieving data...'; }
   function c() {
     let e = Date.now();
     s.forEach(t => {
@@ -84,9 +90,9 @@
   async function p() {
     h(a), l.innerHTML = "", i.disabled = !0, m && (m.style.display = "none", m.disabled = !0, m.textContent = "destroy all"), o && (clearInterval(o), o = null), s = [], g = [];
     try {
-      let e = await fetch("/i/mine"), t = await e.json();
+      let e = await fetch("/back/mine"), t = await e.json();
       if (!e.ok) throw Error(t.error || "load failed");
-      if (!t.links.length) { d(a, "none"); return }
+      if (!t.links.length) { d(a,null); return }
       g = t.links.map(x => x.slug);
       d(a, ""), t.links.forEach(e => l.appendChild(function e(t) {
         let n = document.createElement("li"); n.className = "link-item";
@@ -94,14 +100,25 @@
         try { n.id = 'slug-' + encodeURIComponent(t.slug); } catch {}
         let r = document.createElement("header"), l = document.createElement("div"); l.style.flex = "1";
         let a = document.createElement("strong"), i = document.createElement("a");
-        i.href = t.redirectUrl, i.textContent = t.redirectUrl, i.target = "_blank", i.rel = "noopener noreferrer", a.appendChild(i);
-        let o = document.createElement("small"); o.textContent = "target: " + t.target;
-        let d = document.createElement("small"); d.textContent = "expires: " + fmt(t.expiresAt);
-        let cr = document.createElement("small"); cr.textContent = "created: " + fmt(t.createdAt);
+        i.href = t.scope;
+        i.title = t.scope;
+        try {
+          const dispUrl = String(t.scope || '').replace(/^https?:\/\//i, '');
+          i.textContent = _tr(dispUrl);
+        } catch { i.textContent = _tr(t.scope); }
+        i.target = "_blank", i.rel = "noopener noreferrer", a.appendChild(i);
+        let o = document.createElement("small");
+        o.title = t.target;
+        try {
+          const disp = String(t.target || '').replace(/^https?:\/\//i, '');
+          o.textContent = "target: " + _tr(disp);
+        } catch { o.textContent = "target: " + _tr(t.target); }
+        let d = document.createElement("small"); d.textContent = "expires: " + fmt(t.finish);
+        let cr = document.createElement("small"); cr.textContent = "created: " + fmt(t.made);
         let tl = document.createElement("small"); tl.textContent = "time left: ";
         let c = document.createElement("span"); c.className = "countdown"; c.textContent = "ticking...";
         tl.appendChild(c);
-        s.push({ element: c, expiresAt: t.expiresAt });
+        s.push({ element: c, expiresAt: t.finish });
         l.appendChild(a), l.appendChild(o), l.appendChild(d), l.appendChild(cr), l.appendChild(tl);
         let bw = document.createElement("div");
         bw.style.display = "flex"; bw.style.flexDirection = "column"; bw.style.gap = "8px";
@@ -111,7 +128,7 @@
         let cp = document.createElement("button");
         cp.type = "button"; cp.textContent = "copy";
         cp.addEventListener("click", async () => {
-          const url = t.redirectUrl;
+          const url = t.scope;
           try {
             if (navigator.clipboard && navigator.clipboard.writeText) {
               await navigator.clipboard.writeText(url);
@@ -134,9 +151,9 @@
     } catch (n) { console.error(n), d(a, "error") } finally { i.disabled = !1 }
   }
   async function u(e, t) {
-    t.disabled = !0; let n = t.innerHTML; t.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span>';
+    t.disabled = !0; let n = t.innerHTML; t.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> Retrieving data...';
     try {
-      let r = await fetch("/i/rules/" + e, { method: "DELETE" }), l = await r.json();
+      let r = await fetch("/back/scope/" + e, { method: "DELETE" }), l = await r.json();
       if (!r.ok) throw Error(l.error || "destroy failed"); await p()
     } catch (i) { console.error(i), d(a, "error") } finally { t.disabled = !1, t.innerHTML = n }
   }
@@ -145,7 +162,7 @@
     let a = { url: e.url.value, ttlMinutes: Number(e.ttl.value), slugMode: e.slugMode && e.slugMode.value ? e.slugMode.value : 'alphanumeric' };
     try { if (z && z.checked && VM.has(a.slugMode)) localStorage.setItem(MODE_KEY, a.slugMode); } catch {}
     try {
-      let i = await fetch("/i/rules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
+      let i = await fetch("/back/new", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
       let o = await i.json();
       if (!i.ok) { d(t, o.error || "create failed"); return }
       d(t, "done");
@@ -159,11 +176,11 @@
   }), i.addEventListener("click", () => { p() }), m && m.addEventListener("click", async () => {
     if (!g.length) return;
     if (!confirm(`Destroy all ${g.length} scopes?`)) return;
-    m.disabled = !0; const orig = m.innerHTML; m.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span>';
+    m.disabled = !0; const orig = m.innerHTML; m.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> Retrieving data...';
     try {
       for (const slug of g) {
         try {
-          const r = await fetch("/i/rules/" + slug, { method: "DELETE" });
+          const r = await fetch("/back/scope/" + slug, { method: "DELETE" });
           await r.json();
         } catch {}
       }
