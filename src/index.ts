@@ -10,11 +10,11 @@ export default {
     const url = new URL(request.url);
     const clientIp = getClientIp(request);
 
-    if (request.method === 'OPTIONS' && url.pathname.startsWith('/i/')) {
+    if (request.method === 'OPTIONS' && url.pathname.startsWith('/back/')) {
       return new Response(null, { headers: corsHeaders() });
     }
 
-    if (url.pathname.startsWith('/i/')) {
+    if (url.pathname.startsWith('/back/')) {
       const bl = await getBlockStatus(env, clientIp);
       if (bl.status === 'perm') {
         return jsonError('Forbidden', 403);
@@ -61,15 +61,15 @@ export default {
       }
     }
 
-    if (url.pathname === '/i/rules' && request.method === 'POST') {
+    if (url.pathname === '/back/new' && request.method === 'POST') {
       if (await hasCooldown(env, clientIp)) {
         await onRateLimited(env, clientIp);
         return jsonError('Too many requests, wait 5s', 429);
       }
       const daily = await getDailyCount(env, clientIp);
-      if (daily >= 20) {
+      if (daily >= 50) {
         await onRateLimited(env, clientIp);
-        return jsonError('Daily limit reached (20)', 429);
+        return jsonError('Daily limit reached (50)', 429);
       }
 
       const resp = await handleCreateLink(request, env, url, ctx);
@@ -80,12 +80,12 @@ export default {
       return resp;
     }
 
-    if (url.pathname === '/i/mine' && request.method === 'GET') {
+    if (url.pathname === '/back/mine' && request.method === 'GET') {
       return handleListLinks(request, env, url);
     }
 
-    if (url.pathname.startsWith('/i/rules/') && request.method === 'DELETE') {
-      const slugPart = url.pathname.replace('/i/rules/', '');
+    if (url.pathname.startsWith('/back/scope/') && request.method === 'DELETE') {
+      const slugPart = url.pathname.replace('/back/scope/', '');
       const slug = normalizeSlug(slugPart);
       if (!slug) {
         return jsonError('Invalid slug', 400);
