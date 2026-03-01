@@ -1,192 +1,365 @@
-!function () {
-  let e = document.getElementById("targ"),
-    t = document.getElementById("stat"),
-    r = document.getElementById("create-button"),
-    l = document.getElementById("lis"),
-    a = document.getElementById("lit"),
-    i = document.getElementById("refr"),
-    m = document.getElementById("dall"),
-    y = document.getElementById("slug-mode"),
-    z = document.getElementById("remember-slug-mode"),
-    o = null,
-    s = [],
-    g = [];
-  function __prefers12h() {
-    let pref = true;
-    try {
-      const ro = new Intl.DateTimeFormat().resolvedOptions();
-      if (typeof ro.hour12 === 'boolean') return ro.hour12;
-      const test = new Date(Date.UTC(2020, 0, 1, 13, 0, 0));
-      const parts = new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: 'UTC' }).formatToParts(test);
-      pref = parts.some(p => p.type === 'dayPeriod');
-    } catch {}
-    return pref;
-  }
-  const __df = new Intl.DateTimeFormat(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: __prefers12h() || true
-  });
-  const fmt = (ts) => __df.format(new Date(ts));
-  const MODE_KEY = 'slugMode';
-  const MODE_FLAG_KEY = 'rememberSlugMode';
-  const VM = new Set(['letters','numbers','alphanumeric','words','icons']);
-  (function initRemember() {
-    try {
-      const flag = localStorage.getItem(MODE_FLAG_KEY);
-      if (z && flag === '1') z.checked = true;
-      if (y && z && z.checked) {
-        const saved = localStorage.getItem(MODE_KEY);
-        if (saved && VM.has(saved)) y.value = saved;
-      }
-    } catch {}
-  })();
+const form = document.getElementById("targ");
+const status = document.getElementById("stat");
+const createBtn = document.getElementById("create-button");
+const list = document.getElementById("lis");
+const listTitle = document.getElementById("lit");
+const refreshBtn = document.getElementById("refr");
+const destroyAll = document.getElementById("dall");
+const slugMode = document.getElementById("slug-mode");
+const rememberSlug = document.getElementById("remember-slug-mode");
+const welcome = document.getElementById("welcome");
 
-  if (z) {
-    z.addEventListener('change', () => {
-      try {
-        if (z.checked) {
-          localStorage.setItem(MODE_FLAG_KEY, '1');
-          if (y && VM.has(y.value)) localStorage.setItem(MODE_KEY, y.value);
-        } else {
-          localStorage.removeItem(MODE_FLAG_KEY);
-          localStorage.removeItem(MODE_KEY);
-        }
-      } catch {}
-    });
-  }
+let ticker = null;
+let timers = [];
+let slugs = [];
 
-  if (y) {
-    y.addEventListener('change', () => {
-      try {
-        if (z && z.checked) {
-          const v = y.value; if (VM.has(v)) localStorage.setItem(MODE_KEY, v);
-        }
-      } catch {}
-    });
-  }
-  function d(e, t) { e.textContent = t }
-  function _tr(u, m = 25) {
-    try {
-      if (!u || typeof u !== 'string') return '';
-      return u.length > m ? u.slice(0, m) + '...' : u;
-    } catch { return String(u); }
-  }
-  function h(e) { e.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> Retrieving data...'; }
-  function c() {
-    let e = Date.now();
-    s.forEach(t => {
-      let n = t.expiresAt - e;
-      if (n <= 0) { t.element.textContent = "expired", t.element.classList.add("expired"); return }
-      t.element.textContent = function e(t) {
-        let n = Math.floor(t / 1e3), r = Math.floor(n / 3600), l = [];
-        return r > 0 && l.push(r + "h"), l.push(String(Math.floor(n % 3600 / 60)).padStart(2, "0") + "m"), l.push(String(n % 60).padStart(2, "0") + "s"), l.join(" ")
-      }(n), t.element.classList.remove("expired")
-    })
-  }
-  async function p() {
-    h(a), l.innerHTML = "", i.disabled = !0, m && (m.style.display = "none", m.disabled = !0, m.textContent = "destroy all"), o && (clearInterval(o), o = null), s = [], g = [];
-    try {
-      let e = await fetch("/back/mine"), t = await e.json();
-      if (!e.ok) throw Error(t.error || "load failed");
-      if (!t.links.length) { d(a,null); return }
-      g = t.links.map(x => x.slug);
-      d(a, ""), t.links.forEach(e => l.appendChild(function e(t) {
-        let n = document.createElement("li"); n.className = "link-item";
-        try { n.dataset.slug = t.slug; } catch {}
-        try { n.id = 'slug-' + encodeURIComponent(t.slug); } catch {}
-        let r = document.createElement("header"), l = document.createElement("div"); l.style.flex = "1";
-        let a = document.createElement("strong"), i = document.createElement("a");
-        i.href = t.scope;
-        i.title = t.scope;
-        try {
-          const dispUrl = String(t.scope || '').replace(/^https?:\/\//i, '');
-          i.textContent = _tr(dispUrl);
-        } catch { i.textContent = _tr(t.scope); }
-        i.target = "_blank", i.rel = "noopener noreferrer", a.appendChild(i);
-        let o = document.createElement("small");
-        o.title = t.target;
-        try {
-          const disp = String(t.target || '').replace(/^https?:\/\//i, '');
-          o.textContent = "target: " + _tr(disp);
-        } catch { o.textContent = "target: " + _tr(t.target); }
-        let d = document.createElement("small"); d.textContent = "expires: " + fmt(t.finish);
-        let cr = document.createElement("small"); cr.textContent = "created: " + fmt(t.made);
-        let tl = document.createElement("small"); tl.textContent = "time left: ";
-        let c = document.createElement("span"); c.className = "countdown"; c.textContent = "ticking...";
-        tl.appendChild(c);
-        s.push({ element: c, expiresAt: t.finish });
-        l.appendChild(a), l.appendChild(o), l.appendChild(d), l.appendChild(cr), l.appendChild(tl);
-        let bw = document.createElement("div");
-        bw.style.display = "flex"; bw.style.flexDirection = "column"; bw.style.gap = "8px";
-        let p = document.createElement("button");
-        p.type = "button"; p.textContent = "destroy"; p.style.backgroundColor = "RED";
-        p.addEventListener("click", () => { if (confirm("Are you sure?")) u(t.slug, p) });
-        let cp = document.createElement("button");
-        cp.type = "button"; cp.textContent = "copy";
-        cp.addEventListener("click", async () => {
-          const url = t.scope;
-          try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              await navigator.clipboard.writeText(url);
-            } else {
-              throw new Error('no-clipboard');
-            }
-            const old = cp.textContent; cp.textContent = "copied!"; setTimeout(() => cp.textContent = old, 1500);
-          } catch {
-            const tmp = document.createElement('input');
-            tmp.value = url; document.body.appendChild(tmp); tmp.select();
-            try { document.execCommand('copy'); const old = cp.textContent; cp.textContent = "copied!"; setTimeout(() => cp.textContent = old, 1500); }
-            finally { document.body.removeChild(tmp); }
-          }
-        });
-        bw.appendChild(p); bw.appendChild(cp);
-        r.appendChild(l); r.appendChild(bw);
-        n.appendChild(r);
-        return n
-      }(e))), t.links.length > 3 && m && (m.style.display = "inline-flex", m.disabled = !1), o && (clearInterval(o), o = null), s.length && (c(), o = setInterval(c, 1e3))
-    } catch (n) { console.error(n), d(a, "error") } finally { i.disabled = !1 }
-  }
-  async function u(e, t) {
-    t.disabled = !0; let n = t.innerHTML; t.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> Retrieving data...';
-    try {
-      let r = await fetch("/back/scope/" + e, { method: "DELETE" }), l = await r.json();
-      if (!r.ok) throw Error(l.error || "destroy failed"); await p()
-    } catch (i) { console.error(i), d(a, "error") } finally { t.disabled = !1, t.innerHTML = n }
-  }
-  e.addEventListener("submit", async l => {
-    l.preventDefault(), h(t), r.disabled = !0;
-    let a = { url: e.url.value, ttlMinutes: Number(e.ttl.value), slugMode: e.slugMode && e.slugMode.value ? e.slugMode.value : 'alphanumeric' };
-    try { if (z && z.checked && VM.has(a.slugMode)) localStorage.setItem(MODE_KEY, a.slugMode); } catch {}
-    try {
-      let i = await fetch("/back/new", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(a) });
-      let o = await i.json();
-      if (!i.ok) { d(t, o.error || "create failed"); return }
-      d(t, "done");
-      await p();
-      try {
-        const el = document.getElementById('slug-' + encodeURIComponent(o.slug));
-        if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 700); }
-      } catch {}
-      const __sm=a.slugMode; const __rm = z && z.checked; e.reset(); e.ttl.value = "5"; if (e.slugMode) e.slugMode.value = __sm; if (z) z.checked = __rm;
-    } catch (c) { console.error(c), d(t, "error") } finally { r.disabled = !1 }
-  }), i.addEventListener("click", () => { p() }), m && m.addEventListener("click", async () => {
-    if (!g.length) return;
-    if (!confirm(`Destroy all ${g.length} scopes?`)) return;
-    m.disabled = !0; const orig = m.innerHTML; m.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> Retrieving data...';
-    try {
-      for (const slug of g) {
-        try {
-          const r = await fetch("/back/scope/" + slug, { method: "DELETE" });
-          await r.json();
-        } catch {}
-      }
-      await p();
-    } finally {
-      m.innerHTML = orig; m.disabled = !1;
+(() => {
+  try {
+    const KEY = 'welcome';
+    const seen = localStorage.getItem(KEY);
+    if (seen === null) {
+      localStorage.setItem(KEY, '1');
+    } else if (welcome) {
+      welcome.textContent = 'Welcome back to';
     }
-  }), p()
-}();
+  } catch { }
+})();
+
+const MODE_KEY = 'slugMode';
+const REMEMBER_KEY = 'rememberSlugMode';
+const VALID_MODES = new Set(['letters', 'numbers', 'alphanumeric', 'words', 'icons']);
+
+function prefers12h() {
+  let result = true;
+  try {
+    const opts = new Intl.DateTimeFormat().resolvedOptions();
+    if (typeof opts.hour12 === 'boolean') return opts.hour12;
+    const date = new Date(Date.UTC(2020, 0, 1, 13, 0, 0));
+    const parts = new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: 'UTC' }).formatToParts(date);
+    result = parts.some(p => p.type === 'dayPeriod');
+  } catch { }
+  return result;
+}
+
+const dateFormat = new Intl.DateTimeFormat(undefined, {
+  year: 'numeric', month: 'short', day: 'numeric',
+  hour: 'numeric', minute: '2-digit', hour12: prefers12h() || true
+});
+
+const formatDate = (ts) => dateFormat.format(new Date(ts));
+
+(function initSavedMode() {
+  try {
+    const flag = localStorage.getItem(REMEMBER_KEY);
+    if (rememberSlug && flag === '1') rememberSlug.checked = true;
+    if (slugMode && rememberSlug && rememberSlug.checked) {
+      const saved = localStorage.getItem(MODE_KEY);
+      if (saved && VALID_MODES.has(saved)) slugMode.value = saved;
+    }
+  } catch { }
+})();
+
+if (rememberSlug) {
+  rememberSlug.addEventListener('change', () => {
+    try {
+      if (rememberSlug.checked) {
+        localStorage.setItem(REMEMBER_KEY, '1');
+        if (slugMode && VALID_MODES.has(slugMode.value)) localStorage.setItem(MODE_KEY, slugMode.value);
+      } else {
+        localStorage.removeItem(REMEMBER_KEY);
+        localStorage.removeItem(MODE_KEY);
+      }
+    } catch { }
+  });
+}
+
+if (slugMode) {
+  slugMode.addEventListener('change', () => {
+    try {
+      if (rememberSlug && rememberSlug.checked) {
+        const v = slugMode.value;
+        if (VALID_MODES.has(v)) localStorage.setItem(MODE_KEY, v);
+      }
+    } catch { }
+  });
+}
+
+function setText(el, text) {
+  el.textContent = text;
+}
+
+function truncate(url, max = 25) {
+  try {
+    if (!url || typeof url !== 'string') return '';
+    return url.length > max ? url.slice(0, max) + '...' : url;
+  } catch {
+    return String(url);
+  }
+}
+
+function showSpinner(el, message = 'Loading...') {
+  el.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> ' + message;
+}
+
+function formatRemaining(ms) {
+  const total = Math.floor(ms / 1000);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  const parts = [];
+  if (hours > 0) parts.push(hours + 'h');
+  parts.push(String(minutes).padStart(2, '0') + 'm');
+  parts.push(String(seconds).padStart(2, '00') + 's');
+  return parts.join(' ');
+}
+
+function tick() {
+  const now = Date.now();
+  timers.forEach(t => {
+    const remaining = t.expiresAt - now;
+    if (remaining <= 0) {
+      t.element.textContent = 'expired';
+      t.element.classList.add('expired');
+    } else {
+      t.element.textContent = formatRemaining(remaining);
+      t.element.classList.remove('expired');
+    }
+  });
+}
+
+async function loadLinks() {
+  showSpinner(listTitle, 'Refreshing scopes...');
+  list.innerHTML = '';
+  refreshBtn.disabled = true;
+
+  if (destroyAll) {
+    destroyAll.style.display = 'none';
+    destroyAll.disabled = true;
+    destroyAll.textContent = 'destroy all';
+  }
+
+  if (ticker) { clearInterval(ticker); ticker = null; }
+  timers = [];
+  slugs = [];
+
+  try {
+    const res = await fetch('/back/mine');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'load failed');
+
+    if (!data.links.length) { setText(listTitle, null); return; }
+
+    slugs = data.links.map(l => l.slug);
+    setText(listTitle, '');
+    data.links.forEach(l => list.appendChild(buildItem(l)));
+
+    if (data.links.length > 3 && destroyAll) {
+      destroyAll.style.display = 'inline-flex';
+      destroyAll.disabled = false;
+    }
+
+    if (timers.length) { tick(); ticker = setInterval(tick, 1000); }
+  } catch (err) {
+    console.error(err);
+    setText(listTitle, 'error');
+  } finally {
+    refreshBtn.disabled = false;
+  }
+}
+
+async function deleteLink(slug, btn) {
+  btn.disabled = true;
+  const prev = btn.innerHTML;
+  showSpinner(btn, 'Destroying scope...');
+  try {
+    const res = await fetch('/back/scope/' + slug, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'destroy failed');
+    await loadLinks();
+  } catch (err) {
+    console.error(err);
+    setText(listTitle, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = prev;
+  }
+}
+
+function buildItem(link) {
+  const item = document.createElement('li');
+  item.className = 'link-item';
+  try { item.dataset.slug = link.slug; } catch { }
+  try { item.id = 'slug-' + encodeURIComponent(link.slug); } catch { }
+
+  const header = document.createElement('header');
+  const infoCol = document.createElement('div');
+  infoCol.style.flex = '1';
+
+  const heading = document.createElement('strong');
+  const anchor = document.createElement('a');
+  anchor.href = link.scope;
+  anchor.title = link.scope;
+  try {
+    anchor.textContent = truncate(String(link.scope || '').replace(/^https?:\/\//i, ''));
+  } catch {
+    anchor.textContent = truncate(link.scope);
+  }
+  anchor.target = '_blank';
+  anchor.rel = 'noopener noreferrer';
+  heading.appendChild(anchor);
+
+  const targetLabel = document.createElement('small');
+  targetLabel.title = link.target;
+  try {
+    targetLabel.textContent = 'target: ' + truncate(String(link.target || '').replace(/^https?:\/\//i, ''));
+  } catch {
+    targetLabel.textContent = 'target: ' + truncate(link.target);
+  }
+
+  const expiresLabel = document.createElement('small');
+  expiresLabel.textContent = 'expires: ' + formatDate(link.finish);
+
+  const createdLabel = document.createElement('small');
+  createdLabel.textContent = 'created: ' + formatDate(link.made);
+
+  const timeLeftLabel = document.createElement('small');
+  timeLeftLabel.textContent = 'time left: ';
+  const countdown = document.createElement('span');
+  countdown.className = 'countdown';
+  countdown.textContent = 'ticking...';
+  timeLeftLabel.appendChild(countdown);
+  timers.push({ element: countdown, expiresAt: link.finish });
+
+  infoCol.appendChild(heading);
+  infoCol.appendChild(targetLabel);
+  infoCol.appendChild(expiresLabel);
+  infoCol.appendChild(createdLabel);
+  infoCol.appendChild(timeLeftLabel);
+
+  const btnCol = document.createElement('div');
+  btnCol.style.display = 'flex';
+  btnCol.style.flexDirection = 'column';
+  btnCol.style.gap = '8px';
+
+  const destroyBtn = document.createElement('button');
+  destroyBtn.type = 'button';
+  destroyBtn.textContent = 'destroy';
+  destroyBtn.style.backgroundColor = 'RED';
+  destroyBtn.addEventListener('click', () => {
+    if (confirm('Are you sure?')) deleteLink(link.slug, destroyBtn);
+  });
+
+  const copyBtn = document.createElement('button');
+  copyBtn.type = 'button';
+  copyBtn.textContent = 'copy';
+  copyBtn.addEventListener('click', async () => {
+    const url = link.scope;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        throw new Error('no-clipboard');
+      }
+      const orig = copyBtn.textContent;
+      copyBtn.textContent = 'copied!';
+      setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+    } catch {
+      const tmp = document.createElement('input');
+      tmp.value = url;
+      document.body.appendChild(tmp);
+      tmp.select();
+      try {
+        document.execCommand('copy');
+        const orig = copyBtn.textContent;
+        copyBtn.textContent = 'copied!';
+        setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+      } finally {
+        document.body.removeChild(tmp);
+      }
+    }
+  });
+
+  btnCol.appendChild(destroyBtn);
+  btnCol.appendChild(copyBtn);
+  header.appendChild(infoCol);
+  header.appendChild(btnCol);
+  item.appendChild(header);
+  return item;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showSpinner(status, 'Creating scope...');
+  createBtn.disabled = true;
+
+  const payload = {
+    url: form.url.value,
+    ttlMinutes: Number(form.ttl.value),
+    slugMode: (form.slugMode && form.slugMode.value) ? form.slugMode.value : 'alphanumeric',
+  };
+
+  try {
+    if (rememberSlug && rememberSlug.checked && VALID_MODES.has(payload.slugMode)) {
+      localStorage.setItem(MODE_KEY, payload.slugMode);
+    }
+  } catch { }
+
+  try {
+    const res = await fetch('/back/new', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (!res.ok) { setText(status, data.error || 'create failed'); return; }
+
+    setText(status, 'done');
+    await loadLinks();
+
+    try {
+      const el = document.getElementById('slug-' + encodeURIComponent(data.slug));
+      if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 700); }
+    } catch { }
+
+    const savedMode = payload.slugMode;
+    const wasRemember = rememberSlug && rememberSlug.checked;
+    form.reset();
+    form.ttl.value = '5';
+    if (form.slugMode) form.slugMode.value = savedMode;
+    if (rememberSlug) rememberSlug.checked = wasRemember;
+  } catch (err) {
+    console.error(err);
+    setText(status, 'error');
+  } finally {
+    createBtn.disabled = false;
+  }
+});
+
+refreshBtn.addEventListener('click', () => { loadLinks(); });
+
+if (destroyAll) {
+  destroyAll.addEventListener('click', async () => {
+    if (!slugs.length) return;
+    if (!confirm(`Destroy all ${slugs.length} scopes?`)) return;
+
+    destroyAll.disabled = true;
+    const prev = destroyAll.innerHTML;
+    showSpinner(destroyAll, 'Destroying scopes...');
+
+    try {
+      for (const slug of slugs) {
+        try {
+          const res = await fetch('/back/scope/' + slug, { method: 'DELETE' });
+          await res.json();
+        } catch { }
+      }
+      await loadLinks();
+    } finally {
+      destroyAll.innerHTML = prev;
+      destroyAll.disabled = false;
+    }
+  });
+}
+
+loadLinks();
