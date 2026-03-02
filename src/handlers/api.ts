@@ -53,6 +53,7 @@ export async function handleCreateLink(request: Request, env: Env, baseUrl: URL,
   const now = Date.now();
   const expiresAt = now + ttlMinutes * 60 * 1000;
   const slug = await generateUniqueSlug(env.REDIRECTS, slugMode);
+  const expiresAtEpoch = Math.floor(expiresAt / 1000);
 
   await saveRedirect(env, slug, {
     target: normalizedUrl,
@@ -71,6 +72,7 @@ export async function handleCreateLink(request: Request, env: Env, baseUrl: URL,
         { name: 'Destination', value: normalizedUrl, inline: false },
         { name: 'Result', value: redirectUrl, inline: false },
         { name: 'Creator IP', value: ownerIp || 'unknown', inline: false },
+        { name: 'Expiration', value: `<t:${expiresAtEpoch}:R>`, inline: false },
       ],
       timestamp: new Date(now).toISOString(),
     };
