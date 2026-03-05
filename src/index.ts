@@ -1,9 +1,24 @@
 import { handleCreateLink, handleDeleteLink, handleListLinks } from './handlers/api';
 import { handleRedirect } from './handlers/redirect';
-import { corsHeaders, jsonError } from './responses';
-import { getClientIp, normalizeSlug } from './utils';
-import { Env } from './types';
 import { getBlockStatus, duringTempBlockRequest, hasCooldown, onRateLimited, setCooldown, getDailyCount, incrementDailyCount } from './rate_limit';
+import { corsHeaders, jsonError } from './responses';
+import { Env } from './types';
+import { getClientIp, normalizeSlug } from './utils';
+
+function createAssetRequest(request: Request, pathname: string): Request {
+  const rewritten = new URL(request.url);
+  rewritten.pathname = pathname;
+  return new Request(rewritten.toString(), {
+    method: 'GET',
+    headers: new Headers({ 'accept-encoding': 'identity' }),
+  });
+}
+
+async function serveAssetPage(env: Env, request: Request, pathname: string, status = 200): Promise<Response> {
+  const assetRequest = createAssetRequest(request, pathname);
+  const asset = await env.ASSETS.fetch(assetRequest);
+  return new Response(asset.body, { headers: asset.headers, status });
+}
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -30,29 +45,19 @@ export default {
 
     if (request.method === 'GET') {
       if (url.pathname === '/') {
-        const rewritten = new URL(url.toString());
-        rewritten.pathname = '/home.html';
-        return env.ASSETS.fetch(new Request(rewritten.toString(), request));
+        return serveAssetPage(env, request, '/home.html');
       }
       if (url.pathname === '/home') {
-        const rewritten = new URL(url.toString());
-        rewritten.pathname = '/home.html';
-        return env.ASSETS.fetch(new Request(rewritten.toString(), request));
+        return serveAssetPage(env, request, '/home.html');
       }
       if (url.pathname === '/privacy') {
-        const rewritten = new URL(url.toString());
-        rewritten.pathname = '/privacy.html';
-        return env.ASSETS.fetch(new Request(rewritten.toString(), request));
+        return serveAssetPage(env, request, '/privacy.html');
       }
       if (url.pathname === '/rules') {
-        const rewritten = new URL(url.toString());
-        rewritten.pathname = '/rules.html';
-        return env.ASSETS.fetch(new Request(rewritten.toString(), request));
+        return serveAssetPage(env, request, '/rules.html');
       }
       if (url.pathname === '/release_notes') {
-        const rewritten = new URL(url.toString());
-        rewritten.pathname = '/release_notes.html';
-        return env.ASSETS.fetch(new Request(rewritten.toString(), request));
+        return serveAssetPage(env, request, '/release_notes.html');
       }
 
       const asset = await env.ASSETS.fetch(request);
@@ -98,6 +103,6 @@ export default {
       return handleRedirect(slug, env, request);
     }
 
-    return new Response('Not Found', { status: 404 });
+    return serveAssetPage(env, request, '/not-found.html', 404);
   },
 };
