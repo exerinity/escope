@@ -43,7 +43,7 @@ function prefers12h() {
 
 const dateFormat = new Intl.DateTimeFormat(undefined, {
   year: 'numeric', month: 'short', day: 'numeric',
-  hour: 'numeric', minute: '2-digit', hour12: prefers12h() || true
+  hour: 'numeric', minute: '2-digit', hour12: prefers12h()
 });
 
 const formatDate = (ts) => dateFormat.format(new Date(ts));
@@ -109,7 +109,7 @@ function formatRemaining(ms) {
   const parts = [];
   if (hours > 0) parts.push(hours + 'h');
   parts.push(String(minutes).padStart(2, '0') + 'm');
-  parts.push(String(seconds).padStart(2, '00') + 's');
+  parts.push(String(seconds).padStart(2, '0') + 's');
   return parts.join(' ');
 }
 
@@ -348,12 +348,14 @@ if (destroyAll) {
     showSpinner(destroyAll, 'Destroying scopes...');
 
     try {
-      for (const slug of slugs) {
-        try {
-          const res = await fetch('/back/scope/' + slug, { method: 'DELETE' });
-          await res.json();
-        } catch { }
-      }
+      await Promise.all(
+        slugs.map(async (slug) => {
+          try {
+            const res = await fetch('/back/scope/' + slug, { method: 'DELETE' });
+            await res.json();
+          } catch { }
+        })
+      );
       await loadLinks();
     } finally {
       destroyAll.innerHTML = prev;
