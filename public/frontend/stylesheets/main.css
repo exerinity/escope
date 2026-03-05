@@ -20,7 +20,6 @@ button {
 body {
   margin: 0;
   background: #000;
-  font-family: IBM Plex Mono, monospace
 }
 
 main,
@@ -192,25 +191,8 @@ a:active {
   padding-right: 8px;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
-  scrollbar-color: #fff #050505
-}
-
-.lis::-webkit-scrollbar {
-  width: 10px
-}
-
-.lis::-webkit-scrollbar-track {
-  background: #050505;
-  border-radius: 8px
-}
-
-.lis::-webkit-scrollbar-thumb {
-  background: #00ff00;
-  border-radius: 8px
-}
-
-.lis::-webkit-scrollbar-thumb:hover {
-  background: #00cc00
+  scrollbar-color: #fff #050505;
+  --scrollbar-size: 10px;
 }
 
 details {
@@ -249,23 +231,28 @@ details[open] summary::before {
   padding-right: 8px;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
-  scrollbar-color: #fff #050505
+  scrollbar-color: #fff #050505;
+  --scrollbar-size: 8px;
 }
 
+.lis::-webkit-scrollbar,
 .dropcontent::-webkit-scrollbar {
-  width: 8px
+  width: var(--scrollbar-size, 8px)
 }
 
+.lis::-webkit-scrollbar-track,
 .dropcontent::-webkit-scrollbar-track {
   background: #050505;
   border-radius: 8px
 }
 
+.lis::-webkit-scrollbar-thumb,
 .dropcontent::-webkit-scrollbar-thumb {
   background: #00ff00;
   border-radius: 8px
 }
 
+.lis::-webkit-scrollbar-thumb:hover,
 .dropcontent::-webkit-scrollbar-thumb:hover {
   background: #00cc00
 }
