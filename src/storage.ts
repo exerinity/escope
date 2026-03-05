@@ -64,7 +64,6 @@ export async function listActiveRedirects(env: Env, ip: string): Promise<Redirec
     }
 
     if (record.expiresAt <= now) {
-      await deleteRedirect(env, slug, record);
       continue;
     }
 
