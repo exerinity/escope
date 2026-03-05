@@ -1,6 +1,8 @@
 import { SLUG_LENGTH } from './constants';
-import { WORDS } from './words';
 import { ICONS } from './icons';
+import { WORDS } from './words';
+
+const ICON_SET = new Set(ICONS);
 
 export async function parseJsonBody<T>(request: Request): Promise<T | null> {
   try {
@@ -38,7 +40,6 @@ export function normalizeSlug(pathname: string): string | null {
     return trimmed.toLowerCase();
   }
 
-  const ICON_SET = new Set(ICONS);
   for (const ch of trimmed) {
     if (!ICON_SET.has(ch)) {
       return null;
