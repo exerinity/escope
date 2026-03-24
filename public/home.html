@@ -1,1 +1,182 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Home / escope</title><meta name="description" content="escope is a service for creating ephemeral, quick, self-destructing redirects ('scopes')."><meta name="theme-color" content="#6000ff"><meta property="og:type" content="website"><meta property="og:title" content="escope"><meta property="og:description" content="escope is a service for creating ephemeral, quick, self-destructing redirects ('scopes')."><meta property="og:image" content="/escope.png"><link rel="icon" href="/escope.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/escope.svg"><link rel="stylesheet" href="/frontend/stylesheets/main.css"></head><body><main><div class="grid"><section class="panel noselect"><small id="welcome">Welcome to</small><h1><span style="color: #6000ff">$</span> escope</h1><p><abbr style="cursor:help" title="Ephemeral Scoped Control of Persistent Endpoints" onclick="alert('Ephemeral Scoped Control of Persistent Endpoints')">escope</abbr> is a service for creating ephemeral, quick, self-destructing redirects ("scopes"). </p><form id="targ" autocomplete="off"><label for="targu">target</label><input type="url" id="targu" name="url" placeholder="https://exerinity.com" required /><label for="ttr">minutes to expire (1-4320)</label><input type="number" id="ttr" name="ttl" min="1" max="4320" value="5" required /><label for="slug-mode">slug mode</label><select id="slug-mode" name="slugMode"><option value="letters">Random letters</option><option value="numbers">Random numbers</option><option value="alphanumeric" selected>Random letters and numbers</option><option value="icons">Random icons</option><option value="words">Random words</option></select><label for="remember-slug-mode" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="remember-slug-mode" /> remember slug mode </label><button type="submit" id="create-button">Create scope</button></form><div class="status" id="stat"></div><details><summary>More about escope</summary><div class="dropcontent">escope is a Cloudflare Worker, made with TypeScript. Scopes can last from 1 minute to 3 days (4320 minutes) but can be retracted early. Scopes are tied to your IP to prevent abuse and to enable management of your own scopes without any account flows. </div></details><details class="rules"><summary><span>Rules</span><a class="summary-link" href="/rules" target="_blank" rel="noopener noreferrer">Open in new tab</a></summary><div class="dropcontent"><h3>No extreme NSFW</h3><p>This includes but is <u style="color: red; cursor: help" title="Violations can be beyond these hard rules">not limited to</u>:</p><ul><li><abbr style="cursor: help" title="As in, videos of beheaded people bleeding out, stuff like that. Feel free to create links for gas station fight videos on Twitter.">heavy gore</abbr></li><li>sexualized depictions of minors, fictitious or not</li><li>revenge porn</li></ul><h3>No cracks, malware or scams</h3><p>This includes but is <u style="color: red; cursor: help" title="Violations can be beyond these hard rules">not limited to</u>:</p><ul><li>game cheats and cracks</li><li>software cracks</li><li>heavily modified software</li></ul><h3>Avoid copyrighted content</h3><p>This is not a hard "don't do this", but avoid sharing links for things like Blu-Ray rips of full-length movies.</p><h3>Please don't spam</h3><p>There are rate limits in place. If you are trying to abuse escope, you will be blacklisted indefinitely. </p></div></details><details><summary><span>Privacy</span><a class="summary-link" href="/privacy" target="_blank" rel="noopener noreferrer">Open in new tab</a></summary><div class="dropcontent"><h3>Overview</h3><h3>TL;DR</h3><p> escope does not use or handle accounts, cookies, analytics, or ads. It stores the URL you submit and your IP address only to run the redirect, show your active scopes, and prevent abuse. Scopes automatically delete themselves at expiry, and you can destroy them early at any time. </p><ul><li>escope does not handle accounts, cookies, analytics, or ads</li><li>escope stores the target URL and your IP to operate the service and prevent abuse</li><li>Data lives in Cloudflare Workers KV and is removed when scopes expire</li><li><strong>Your IP address is logged when you create a scope</strong></li></ul><h3>Data processed</h3><ul><li>Target URL you submit</li><li>A randomized slug</li><li>Timestamps: created and expires</li><li>Your IP address</li></ul><h3>How escope uses your data</h3><ul><li>Run redirects until expiry</li><li>Show "Your scopes" and allow early deletion (by your IP)</li><li>Prevent abuse, spam, and fraud</li></ul><h3>Storage and retention</h3><ul><li>Scopes self-destruct at the time you choose</li><li>A per-IP index of active slugs exists only while you have active scopes; it is deleted when empty</li><li>Cloudflare may process transient request metadata under their platform policies</li></ul><h3>Sharing and providers</h3><ul><li>escope runs on Cloudflare (Workers + KV). I do not sell any data or run ads</li></ul><h3>Security</h3><p>I minimize data collection and rely on Cloudflare's platform security. However, please do not use escope for sensitive data</p><h3>Your rights</h3><ul><li>Delete your scopes via the "Destroy" button</li><li>Contact: <a href="https://exerinity.com/email" target="_blank" rel="noopener noreferrer">exerinity.com/email</a></li></ul></div></details><p><span style="text-decoration: none;" class="report">Ephemeral Scoped Control of Persistent Endpoints</span><br><a class="report" href="/release_notes">v2b</a> - <a class="report" href="https://exerinity.com/projects/escope" target="_blank">About</a> - <a class="report" href="https://exerinity.gay/" target="_blank">By exerinity</a> - <a class="report" href="https://exerinity.com/email" target="_blank">Report abuse / contact</a></p></section><section class="panel"><div class="actions"><h2>Your active scopes</h2><button type="button" id="dall" aria-label="Destroy all" style="display:none;background-color:RED">destroy all</button><button type="button" id="refr" aria-label="Refresh scopes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M436.7 74.7L448 85.4 448 32c0-17.7 14.3-32 32-32s32 14.3 32 32l0 128c0 17.7-14.3 32-32 32l-128 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l47.9 0-7.6-7.2c-.2-.2-.4-.4-.6-.6-75-75-196.5-75-271.5 0s-75 196.5 0 271.5 196.5 75 271.5 0c8.2-8.2 15.5-16.9 21.9-26.1 10.1-14.5 30.1-18 44.6-7.9s18 30.1 7.9 44.6c-8.5 12.2-18.2 23.8-29.1 34.7-100 100-262.1 100-362 0S-25 175 75 75c99.9-99.9 261.7-100 361.7-.3z" /></svg></button></div><div class="stat" id="lit"><span class="spinner" aria-label="loading" role="status"></span> Retrieving data... </div><ul class="lis" id="lis"></ul></section></div></main><script src="/frontend/scripts/main.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home / escope</title>
+  <meta name="description"
+    content="escope is a service for creating ephemeral, quick, self-destructing redirects ('scopes').">
+  <meta name="theme-color" content="#6000ff">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="escope">
+  <meta property="og:description"
+    content="escope is a service for creating ephemeral, quick, self-destructing redirects ('scopes').">
+  <meta property="og:image" content="/escope.png">
+  <link rel="icon" href="/escope.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/escope.svg">
+  <link rel="stylesheet" href="/frontend/stylesheets/main.css">
+</head>
+
+<body>
+  <main>
+    <div class="grid">
+      <section class="panel"><small id="welcome">Welcome to</small>
+        <h1><span style="color: #6000ff">$</span> escope</h1>
+        <p>
+          <abbr style="cursor:help" title="Ephemeral Scoped Control of Persistent Endpoints"
+            onclick="alert('Ephemeral Scoped Control of Persistent Endpoints')">escope</abbr> is a service for creating
+          ephemeral, quick, self-destructing redirects ("scopes").
+        </p>
+        <form id="targ" autocomplete="off">
+          <label for="targu">target</label>
+          <input type="url" id="targu" name="url" placeholder="https://exerinity.com" required />
+
+          <label for="ttr">minutes to expire (1-4320)</label>
+          <input type="number" id="ttr" name="ttl" min="1" max="4320" value="5" required />
+
+          <label for="slug-mode">slug mode</label>
+          <select id="slug-mode" name="slugMode">
+            <option value="letters">Random letters</option>
+            <option value="numbers">Random numbers</option>
+            <option value="alphanumeric" selected>Random letters and numbers</option>
+            <option value="icons">Random icons</option>
+            <option value="words">Random words</option>
+          </select>
+
+          <label for="remember-slug-mode" style="display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="remember-slug-mode" />
+            remember slug mode
+          </label>
+
+          <button type="submit" id="create-button">Create scope</button>
+        </form>
+        <div class="status" id="stat"></div>
+        <details>
+          <summary>More about escope</summary>
+          <div class="dropcontent">escope is a Cloudflare Worker, made with TypeScript. Scopes can last from 1 minute to
+            3 days (4320 minutes)
+            but
+            can be retracted early. Scopes are tied to your IP to prevent abuse and to enable management of your own
+            scopes without any account flows.
+          </div>
+        </details>
+        <details class="rules">
+          <summary><span>Rules</span><a class="summary-link" href="/rules" target="_blank"
+              rel="noopener noreferrer">Open in new tab</a></summary>
+          <div class="dropcontent">
+            <h3>No extreme NSFW</h3>
+            <p>This includes but is <u style="color: red; cursor: help"
+                title="Violations can be beyond these hard rules">not
+                limited to</u>:</p>
+            <ul>
+              <li><abbr style="cursor: help"
+                  title="As in, videos of beheaded people bleeding out, stuff like that. Feel free to create links for gas station fight videos on Twitter.">heavy
+                  gore</abbr></li>
+              <li>sexualized depictions of minors, fictitious or not</li>
+              <li>revenge porn</li>
+            </ul>
+            <h3>No cracks, malware or scams</h3>
+            <p>This includes but is <u style="color: red; cursor: help"
+                title="Violations can be beyond these hard rules">not
+                limited to</u>:</p>
+            <ul>
+              <li>game cheats and cracks</li>
+              <li>software cracks</li>
+              <li>heavily modified software</li>
+            </ul>
+            <h3>Avoid copyrighted content</h3>
+            <p>This is not a hard "don't do this", but avoid sharing links for things like Blu-Ray rips of full-length
+              movies.</p>
+            <h3>Please don't spam</h3>
+            <p>There are rate limits in place. If you are trying to abuse escope, you will be blacklisted indefinitely.
+            </p>
+          </div>
+        </details>
+        <details>
+          <summary><span>Privacy</span><a class="summary-link" href="/privacy" target="_blank"
+              rel="noopener noreferrer">Open in new tab</a></summary>
+          <div class="dropcontent">
+            <h3>Overview</h3>
+            <h3>TL;DR</h3>
+            <p>
+              escope does not use or handle accounts, cookies, analytics, or ads. It stores the URL you submit and your
+              IP address
+              only to run the redirect, show your active scopes, and prevent abuse. Scopes automatically delete
+              themselves at expiry, and you can destroy them early at any time.
+            </p>
+            <ul>
+              <li>escope does not handle accounts, cookies, analytics, or ads</li>
+              <li>escope stores the target URL and your IP to operate the service and prevent abuse</li>
+              <li>Data lives in Cloudflare Workers KV and is removed when scopes expire</li>
+            </ul>
+
+            <h3>Data processed</h3>
+            <ul>
+              <li>Target URL you submit</li>
+              <li>A randomized slug</li>
+              <li>Timestamps: created and expires</li>
+              <li>Your IP address</li>
+            </ul>
+
+            <h3>How escope uses your data</h3>
+            <ul>
+              <li>Run redirects until expiry</li>
+              <li>Show "Your scopes" and allow early deletion (by your IP)</li>
+              <li>Prevent abuse, spam, and fraud</li>
+            </ul>
+
+            <h3>Storage and retention</h3>
+            <ul>
+              <li>Scopes self-destruct at the time you choose</li>
+              <li>A per-IP index of active slugs exists only while you have active scopes; it is deleted when empty</li>
+              <li>Cloudflare may process transient request metadata under their platform policies</li>
+            </ul>
+
+            <h3>Sharing and providers</h3>
+            <ul>
+              <li>escope runs on Cloudflare (Workers + KV). I do not sell any data or run ads</li>
+            </ul>
+
+            <h3>Security</h3>
+            <p>I minimize data collection and rely on Cloudflare's platform security. However, please do not use escope
+              for
+              sensitive data</p>
+
+            <h3>Your rights</h3>
+            <ul>
+              <li>Delete your scopes via the "Destroy" button</li>
+              <li>Contact: <a href="https://exerinity.com/email" target="_blank"
+                  rel="noopener noreferrer">exerinity.com/email</a></li>
+            </ul>
+          </div>
+        </details>
+        <p><span style="text-decoration: none;" class="report">Ephemeral Scoped Control of Persistent
+            Endpoints</span><br><a class="report" href="/release_notes">v2b</a> -
+          <a class="report" href="https://exerinity.com/projects/escope" target="_blank">About</a> -
+          <a class="report" href="https://exerinity.gay/" target="_blank">By exerinity</a> -
+          <a class="report" href="https://exerinity.com/email" target="_blank">Report abuse / contact</a>
+        </p>
+      </section>
+      <section class="panel">
+        <div class="actions">
+          <h2>Your active scopes</h2>
+          <button type="button" id="dall" aria-label="Destroy all" style="display:none;background-color:RED">destroy
+            all</button>
+          <button type="button" id="refr" aria-label="Refresh scopes">
+            <svg xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"><!--!Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.-->
+              <path fill="currentColor"
+                d="M436.7 74.7L448 85.4 448 32c0-17.7 14.3-32 32-32s32 14.3 32 32l0 128c0 17.7-14.3 32-32 32l-128 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l47.9 0-7.6-7.2c-.2-.2-.4-.4-.6-.6-75-75-196.5-75-271.5 0s-75 196.5 0 271.5 196.5 75 271.5 0c8.2-8.2 15.5-16.9 21.9-26.1 10.1-14.5 30.1-18 44.6-7.9s18 30.1 7.9 44.6c-8.5 12.2-18.2 23.8-29.1 34.7-100 100-262.1 100-362 0S-25 175 75 75c99.9-99.9 261.7-100 361.7-.3z" />
+            </svg></button>
+        </div>
+        <div class="stat" id="lit"><span class="spinner" aria-label="loading" role="status"></span> Retrieving data...
+        </div>
+        <ul class="lis" id="lis"></ul>
+      </section>
+    </div>
+  </main>
+  <script src="/frontend/scripts/main.js"></script>
+</body>
+
+</html>
