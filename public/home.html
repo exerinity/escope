@@ -26,7 +26,8 @@
         <p>
           <abbr style="cursor:help" title="Ephemeral Scoped Control of Persistent Endpoints"
             onclick="alert('Ephemeral Scoped Control of Persistent Endpoints')">escope</abbr> is a service for creating
-          ephemeral, quick, self-destructing redirects ("scopes").
+          ephemeral, quick, self-destructing redirects ("scopes"). Creating a scope is simple: enter a URL to redirect
+          to, and a time for it to expire!
         </p>
         <form id="targ" autocomplete="off">
           <label for="targu">target</label>
@@ -53,17 +54,28 @@
         </form>
         <div class="status" id="stat"></div>
         <details>
-          <summary>More about escope</summary>
+          <summary><span>About</span> <a class="summary-link" href="/about" target="_blank">Open in new tab</a>
+          </summary>
           <div class="dropcontent">escope is a Cloudflare Worker, made with TypeScript. Scopes can last from 1 minute to
             3 days (4320 minutes)
             but
-            can be retracted early. Scopes are tied to your IP to prevent abuse and to enable management of your own
-            scopes without any account flows.
+            can be retracted early, if you made it. Upon the expiry time of the scope, it becomes inaccessible and
+            annulled.<br><br>Scopes are tied to your IP to prevent abuse and to enable management
+            of your own
+            scopes without any accounts.<br><br>Scopes are handled as KV entries and immediately processed with a fast
+            302
+            redirect.<br><br>
+            The premise is simple: enter a link, and how long that link should work, and optionally, a slug mode. Then,
+            share that link anywhere! But, ideally not everywhere... because, you know, it expires.<br><br>
+            When could escope be useful? Well, say, you just minted a fresh Virtual Machine, and you want to get the
+            exact file links for certain software, but clipboard access to your host doesn't work! Make a very
+            short-lived scope for it, and type it in on the VM! Or, another physical computer!<br><br>
+            escope is licensed under the MIT License. Source code is available on <a
+              href="https://github.com/exerinity/escope" target="_blank" rel="noopener noreferrer">GitHub</a>.
           </div>
         </details>
         <details class="rules">
-          <summary><span>Rules</span><a class="summary-link" href="/rules" target="_blank"
-              rel="noopener noreferrer">Open in new tab</a></summary>
+          <summary><span>Rules</span><a class="summary-link" href="/rules" target="_blank">Open in new tab</a></summary>
           <div class="dropcontent">
             <h3>No extreme NSFW</h3>
             <p>This includes but is <u style="color: red; cursor: help"
@@ -71,11 +83,12 @@
                 limited to</u>:</p>
             <ul>
               <li><abbr style="cursor: help"
-                  title="As in, videos of beheaded people bleeding out, stuff like that. Feel free to create links for gas station fight videos on Twitter.">heavy
+                  title="As in, videos of beheaded corpses bleeding out, stuff like that. Feel free to create links for gas station fight videos on Twitter.">heavy
                   gore</abbr></li>
               <li>sexualized depictions of minors, fictitious or not</li>
               <li>revenge porn</li>
             </ul>
+            <small>(This does not mean <i>no</i> NSFW)</small>
             <h3>No cracks, malware or scams</h3>
             <p>This includes but is <u style="color: red; cursor: help"
                 title="Violations can be beyond these hard rules">not
@@ -94,8 +107,8 @@
           </div>
         </details>
         <details>
-          <summary><span>Privacy</span><a class="summary-link" href="/privacy" target="_blank"
-              rel="noopener noreferrer">Open in new tab</a></summary>
+          <summary><span>Privacy</span><a class="summary-link" href="/privacy" target="_blank">Open in new tab</a>
+          </summary>
           <div class="dropcontent">
             <h3>Overview</h3>
             <h3>TL;DR</h3>
@@ -146,16 +159,14 @@
             <h3>Your rights</h3>
             <ul>
               <li>Delete your scopes via the "Destroy" button</li>
-              <li>Contact: <a href="https://exerinity.com/email" target="_blank"
-                  rel="noopener noreferrer">exerinity.com/email</a></li>
+              <li>Contact: <a href="https://exerinity.com/email" target="_blank">exerinity.com/email</a></li>
             </ul>
           </div>
         </details>
-        <p><span style="text-decoration: none;" class="report">Ephemeral Scoped Control of Persistent
-            Endpoints</span><br><a class="report" href="/release_notes">v2b</a> -
+        <p><span style="text-decoration: none;" class="report"><u>E</u>phemeral <u>S</u>coped <u>C</u>ontrol <u>O</u>f <u>P</u>ersistent <u>E</u>ndpoints</span><br><a class="report" href="/release_notes">v2c</a> -
           <a class="report" href="https://exerinity.com/projects/escope" target="_blank">About</a> -
           <a class="report" href="https://exerinity.gay/" target="_blank">By exerinity</a> -
-          <a class="report" href="https://exerinity.com/email" target="_blank">Report abuse / contact</a>
+          <a class="report" href="https://exerinity.com/email" target="_blank">Contact</a>
         </p>
       </section>
       <section class="panel">
