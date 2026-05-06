@@ -1,121 +1,123 @@
-const form = document.getElementById("targ");
-const status = document.getElementById("stat");
-const createBtn = document.getElementById("create-button");
-const list = document.getElementById("lis");
-const listTitle = document.getElementById("lit");
-const refreshBtn = document.getElementById("refr");
-const destroyAll = document.getElementById("dall");
-const slugMode = document.getElementById("slug-mode");
-const rememberSlug = document.getElementById("remember-slug-mode");
-const welcome = document.getElementById("welcome");
+function buildShareUrls(url) {
+  const safeUrl = String(url || '');
+  const tweetText = 'Check out this scope';
+  const blueskyText = 'Check out this scope: ' + safeUrl;
+  const emailBody = 'Check out this scope:\n' + safeUrl;
 
-let ticker = null;
-let timers = [];
-let slugs = [];
-
-(() => {
-  try {
-    const KEY = 'welcome';
-    const seen = localStorage.getItem(KEY);
-    if (seen === null) {
-      localStorage.setItem(KEY, '1');
-    } else if (welcome) {
-      welcome.textContent = 'Welcome back to';
-    }
-  } catch { }
-})();
-
-const MODE_KEY = 'slugMode';
-const REMEMBER_KEY = 'rememberSlugMode';
-const VALID_MODES = new Set(['letters', 'numbers', 'alphanumeric', 'words', 'icons']);
-
-function prefers12h() {
-  let result = true;
-  try {
-    const opts = new Intl.DateTimeFormat().resolvedOptions();
-    if (typeof opts.hour12 === 'boolean') return opts.hour12;
-    const date = new Date(Date.UTC(2020, 0, 1, 13, 0, 0));
-    const parts = new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: 'UTC' }).formatToParts(date);
-    result = parts.some(p => p.type === 'dayPeriod');
-  } catch { }
-  return result;
+  return {
+    twitter: 'https://twitter.com/intent/tweet?' + new URLSearchParams({
+      text: tweetText,
+      url: safeUrl,
+    }).toString(),
+    email: 'mailto:?' + new URLSearchParams({
+      subject: 'Shared scope',
+      body: emailBody,
+    }).toString(),
+    facebook: 'https://www.facebook.com/sharer/sharer.php?' + new URLSearchParams({
+      u: safeUrl,
+    }).toString(),
+    bluesky: 'https://bsky.app/intent/compose?' + new URLSearchParams({
+      text: blueskyText,
+    }).toString(),
+  };
 }
 
-const dateFormat = new Intl.DateTimeFormat(undefined, {
-  year: 'numeric', month: 'short', day: 'numeric',
-  hour: 'numeric', minute: '2-digit', hour12: prefers12h()
-});
+function openShareModal(link) {
+  const urls = buildShareUrls(link.scope);
+  const content = document.createElement('div');
 
-const formatDate = (ts) => dateFormat.format(new Date(ts));
+  const text = document.createElement('h2');
+  text.textContent = 'Share this scope';
+  text.style.margin = '0 0 0.75rem 0';
 
-(function initSavedMode() {
+  const leadingTo = document.createElement('p');
+  leadingTo.style.margin = '0 0 0.75rem 0';
+  leadingTo.appendChild(document.createElement('br'));
+  leadingTo.appendChild(document.createTextNode('leading to '));
+
+  const targetLink = document.createElement('a');
+  targetLink.href = link.target;
+  targetLink.target = '_blank';
+  targetLink.rel = 'noopener noreferrer';
   try {
-    const flag = localStorage.getItem(REMEMBER_KEY);
-    if (rememberSlug && flag === '1') rememberSlug.checked = true;
-    if (slugMode && rememberSlug && rememberSlug.checked) {
-      const saved = localStorage.getItem(MODE_KEY);
-      if (saved && VALID_MODES.has(saved)) slugMode.value = saved;
-    }
-  } catch { }
-})();
-
-if (rememberSlug) {
-  rememberSlug.addEventListener('change', () => {
-    try {
-      if (rememberSlug.checked) {
-        localStorage.setItem(REMEMBER_KEY, '1');
-        if (slugMode && VALID_MODES.has(slugMode.value)) localStorage.setItem(MODE_KEY, slugMode.value);
-      } else {
-        localStorage.removeItem(REMEMBER_KEY);
-        localStorage.removeItem(MODE_KEY);
-      }
-    } catch { }
-  });
-}
-
-if (slugMode) {
-  slugMode.addEventListener('change', () => {
-    try {
-      if (rememberSlug && rememberSlug.checked) {
-        const v = slugMode.value;
-        if (VALID_MODES.has(v)) localStorage.setItem(MODE_KEY, v);
-      }
-    } catch { }
-  });
-}
-
-function setText(el, text) {
-  el.textContent = text;
-}
-
-function truncate(url, max = 25) {
-  try {
-    if (!url || typeof url !== 'string') return '';
-    return url.length > max ? url.slice(0, max) + '...' : url;
+    targetLink.textContent = truncate(String(link.target || '').replace(/^https?:\/\//i, ''), 40);
   } catch {
-    return String(url);
+    targetLink.textContent = truncate(link.target, 40);
   }
-}
+  leadingTo.appendChild(targetLink);
 
-function showSpinner(el, message = 'Loading...') {
-  el.innerHTML = '<span class="spinner" aria-label="loading" role="status"></span> ' + message;
-}
+  const scopeLink = document.createElement('a');
+  scopeLink.href = link.scope;
+  scopeLink.target = '_blank';
+  scopeLink.rel = 'noopener noreferrer';
+  scopeLink.textContent = truncate(String(link.scope || '').replace(/^https?:\/\//i, ''), 40);
+  scopeLink.style.display = 'inline-block';
+  scopeLink.style.marginBottom = '1rem';
 
-function formatRemaining(ms) {
-  const total = Math.floor(ms / 1000);
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const seconds = total % 60;
-  const parts = [];
-  if (hours > 0) parts.push(hours + 'h');
-  parts.push(String(minutes).padStart(2, '0') + 'm');
-  parts.push(String(seconds).padStart(2, '0') + 's');
-  return parts.join(' ');
+  const actions = document.createElement('div');
+  actions.style.display = 'grid';
+  actions.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+  actions.style.gap = '10px';
+
+  function makeShareLink(label, href) {
+    const anchor = document.createElement('a');
+    anchor.className = 'button';
+    anchor.href = href;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    anchor.textContent = label;
+    return anchor;
+  }
+
+  const twitterLink = makeShareLink('Tweet', urls.twitter);
+  const emailLink = makeShareLink('Email', urls.email);
+  const facebookLink = makeShareLink('Post to Facebook', urls.facebook);
+  const blueskyLink = makeShareLink('Post on Bluesky', urls.bluesky);
+
+  const mobileShare = document.createElement('button');
+  mobileShare.type = 'button';
+  mobileShare.textContent = 'Trigger device share dialogue';
+  mobileShare.addEventListener('click', async () => {
+    const url = String(link.scope || '');
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Shared scope',
+          text: 'Check out this scope',
+          url,
+        });
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        throw new Error('no-clipboard');
+      }
+
+      const orig = mobileShare.textContent;
+      mobileShare.textContent = 'Unsupported, copied link instead';
+      setTimeout(() => { mobileShare.textContent = orig; }, 1500);
+    } catch { }
+  });
+
+  content.appendChild(text);
+  content.appendChild(leadingTo);
+  content.appendChild(scopeLink);
+  content.appendChild(actions);
+  actions.appendChild(twitterLink);
+  actions.appendChild(emailLink);
+  actions.appendChild(facebookLink);
+  actions.appendChild(blueskyLink);
+  content.appendChild(document.createElement('br'));
+  content.appendChild(mobileShare);
+
+  msg(content);
 }
 
 function tick() {
   const now = Date.now();
-  timers.forEach(t => {
+  timers.forEach((t) => {
     const remaining = t.expiresAt - now;
     if (remaining <= 0) {
       t.element.textContent = 'expired';
@@ -128,7 +130,7 @@ function tick() {
 }
 
 async function loadLinks() {
-  showSpinner(listTitle, 'Refreshing scopes...');
+  showSpinner(listTitle, 'Retrieving data...');
   list.innerHTML = '';
   refreshBtn.disabled = true;
 
@@ -138,7 +140,10 @@ async function loadLinks() {
     destroyAll.textContent = 'destroy all';
   }
 
-  if (ticker) { clearInterval(ticker); ticker = null; }
+  if (ticker) {
+    clearInterval(ticker);
+    ticker = null;
+  }
   timers = [];
   slugs = [];
 
@@ -147,18 +152,24 @@ async function loadLinks() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'load failed');
 
-    if (!data.links.length) { setText(listTitle, null); return; }
+    if (!data.links.length) {
+      setText(listTitle, null);
+      return;
+    }
 
-    slugs = data.links.map(l => l.slug);
+    slugs = data.links.map((l) => l.slug);
     setText(listTitle, '');
-    data.links.forEach(l => list.appendChild(buildItem(l)));
+    data.links.forEach((l) => list.appendChild(buildItem(l)));
 
     if (data.links.length > 3 && destroyAll) {
       destroyAll.style.display = 'inline-flex';
       destroyAll.disabled = false;
     }
 
-    if (timers.length) { tick(); ticker = setInterval(tick, 1000); }
+    if (timers.length) {
+      tick();
+      ticker = setInterval(tick, 1000);
+    }
   } catch (err) {
     console.error(err);
     setText(listTitle, 'error');
@@ -246,7 +257,42 @@ function buildItem(link) {
   destroyBtn.textContent = 'destroy';
   destroyBtn.style.backgroundColor = 'RED';
   destroyBtn.addEventListener('click', () => {
-    if (confirm('Are you sure?')) deleteLink(link.slug, destroyBtn);
+    const content = document.createElement('div');
+
+    const text = document.createElement('p');
+    text.textContent = 'Are you sure you want to delete this scope?';
+    text.style.margin = '0';
+
+    const actions = document.createElement('div');
+    actions.style.display = 'flex';
+    actions.style.justifyContent = 'center';
+    actions.style.gap = '12px';
+    actions.style.marginTop = '1rem';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.textContent = 'cancel';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.textContent = 'delete';
+    confirmBtn.style.backgroundColor = 'RED';
+
+    content.appendChild(text);
+    content.appendChild(actions);
+    actions.appendChild(cancelBtn);
+    actions.appendChild(confirmBtn);
+
+    const overlay = msg(content);
+
+    cancelBtn.addEventListener('click', () => {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      deleteLink(link.slug, destroyBtn);
+    });
   });
 
   const copyBtn = document.createElement('button');
@@ -279,8 +325,16 @@ function buildItem(link) {
     }
   });
 
+  const shareBtn = document.createElement('button');
+  shareBtn.type = 'button';
+  shareBtn.textContent = 'share';
+  shareBtn.addEventListener('click', () => {
+    openShareModal(link);
+  });
+
   btnCol.appendChild(destroyBtn);
   btnCol.appendChild(copyBtn);
+  btnCol.appendChild(shareBtn);
   header.appendChild(infoCol);
   header.appendChild(btnCol);
   item.appendChild(header);
@@ -312,14 +366,20 @@ form.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
 
-    if (!res.ok) { setText(status, data.error || 'create failed'); return; }
+    if (!res.ok) {
+      setText(status, data.error || 'create failed');
+      return;
+    }
 
     setText(status, 'done');
     await loadLinks();
 
     try {
       const el = document.getElementById('slug-' + encodeURIComponent(data.slug));
-      if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 700); }
+      if (el) {
+        el.classList.add('flash');
+        setTimeout(() => { el.classList.remove('flash'); }, 700);
+      }
     } catch { }
 
     const savedMode = payload.slugMode;
@@ -354,7 +414,7 @@ if (destroyAll) {
             const res = await fetch('/back/scope/' + slug, { method: 'DELETE' });
             await res.json();
           } catch { }
-        })
+        }),
       );
       await loadLinks();
     } finally {
