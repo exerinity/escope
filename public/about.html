@@ -24,22 +24,24 @@
 <body>
   <main>
     <section class="panel" style="width:min(720px,100%)">
-      <h1>About escope</h1>
-      escope is a Cloudflare Worker, made with TypeScript. Scopes can last from 1 minute to
-      3 days (4320 minutes)
-      but
-      can be retracted early, if you made it. Upon the expiry time of the scope, it becomes inaccessible and
-      annulled.<br><br>Scopes are tied to your IP to prevent abuse and to enable management
-      of your own
-      scopes without any accounts.<br><br>Scopes are handled as KV entries and immediately processed with a fast
-      302
-      redirect.<br><br>
-      The premise is simple: enter a link, and how long that link should work, and optionally, a slug mode. Then,
-      share that link anywhere! But, ideally not everywhere... because, you know, it expires.<br><br>
-      When could escope be useful? Well, say, you just minted a fresh Virtual Machine, and you want to get the
-      exact file links for certain software, but clipboard access to your host doesn't work! Make a very
-      short-lived scope for it, and type it in on the VM! Or, another physical computer!
-      <p><a href="/">← Back to home</a></p>
+      <h1>What is escope?</h1>
+      <p>
+        <strong>escope</strong> (a backronym for Ephemeral Scoped Control of Persistent Endpoints) is a minimalist
+        URL shortener/redirect service where you create ephemeral redirect links, or "scopes". Think of it as Bit.ly, but the links always die automatically after a while.
+        That while can be as short as 1 minute and as long as 3 days, or 4320 minutes.
+      </p>
+      <h2>Why?</h2>
+      <p>escope can have many use cases. Honorable mentions:</p>
+      <ul>
+        <li>Downloading extremely specific builds of software on VMs where the VM can't read the host clipboard</li>
+        <li>Showing people extremely long links, especially fraudulent ones in scambaiting</li>
+        <li>In tandem use with disappearing messages on apps like Telegram</li>
+      </ul>
+      <h2>Okay, how does it work?</h2>
+      <p>escope is written in TypeScript and runs on Cloudflare Workers. It uses KV for scope storage. The codebase is very lean and thus is the best of both worlds: the edge-computing speed of Workers and a very lightweight source tree (or whatever)</p>
+      <h2>Can I use the API in my projects?</h2>
+      <p>Yes. Responsibly. If you spam links, the rate limiter will nuke you pretty quickly. If you use escope to make a botnet of unknown links, you will also be blocked across all IP addresses.</p>
+      <p><a href="https://exerinity.com/projects/escope">More info</a><br><a href="/">← Back to home</a></p>
     </section>
   </main>
 </body>
