@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resolve / escope</title>
+  <meta name="theme-color" content="#6000ff">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Resolve / escope">
+  <meta property="og:image" content="/escope.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Resolve / escope">
+  <meta name="twitter:image" content="/escope.png">
+  <link rel="icon" href="/escope.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/escope.svg">
+  <link rel="apple-touch-icon" href="/escope.png">
+  <link rel="stylesheet" href="/frontend/stylesheets/main.css">
+</head>
+
+<body>
+  <main>
+    <section class="panel" style="width:min(560px,100%)">
+      <h1>Resolve a link</h1>
+      <p>Not sure where a link goes? Find out here!</p>
+      <form id="resolve-form" autocomplete="off">
+        <label for="scope-input">scope link or slug</label>
+        <input type="text" id="scope-input" name="scope" placeholder="escp.lol/abc123 or abc123" required />
+        <button type="submit" id="resolve-button">Resolve</button>
+      </form>
+      <div class="status" id="status"></div>
+      <div id="result"></div>
+      <p><a href="/">← Back to home</a></p>
+    </section>
+  </main>
+  <script>
+    (function () {
+      const form = document.getElementById('resolve-form');
+      const input = document.getElementById('scope-input');
+      const button = document.getElementById('resolve-button');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+
+      function setStatus(message, isError) {
+        status.textContent = message || '';
+        status.style.color = isError ? '#ff6b6b' : '#fff';
+      }
+
+      function fmtTime(ms) {
+        try {
+          return new Date(ms).toLocaleString();
+        } catch {
+          return String(ms);
+        }
+      }
+
+      function render(data) {
+        result.innerHTML = '';
+
+        const lead = document.createElement('p');
+        lead.style.margin = '0.5rem 0 0.25rem 0';
+        lead.appendChild(document.createTextNode('leads to '));
+        const target = document.createElement('a');
+        target.href = data.target;
+        target.target = '_blank';
+        target.rel = 'noopener noreferrer';
+        target.textContent = data.target;
+        target.style.wordBreak = 'break-all';
+        lead.appendChild(target);
+        result.appendChild(lead);
+
+        const meta = document.createElement('div');
+        meta.className = 'result';
+        meta.style.color = '#aaa';
+        meta.innerHTML =
+          'slug: <code>' + data.slug + '</code><br>' +
+          'created: ' + fmtTime(data.made) + '<br>' +
+          'expires: ' + fmtTime(data.finish);
+        result.appendChild(meta);
+      }
+
+      async function resolve(value) {
+        setStatus('Resolving…', false);
+        result.innerHTML = '';
+        button.disabled = true;
+        try {
+          const res = await fetch('/back/resolve?url=' + encodeURIComponent(value), {
+            headers: { accept: 'application/json' },
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            setStatus(data.error || 'Could not resolve that scope.', true);
+            return;
+          }
+          setStatus('', false);
+          render(data);
+        } catch {
+          setStatus('Network error. Try again.', true);
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const value = input.value.trim();
+        if (!value) return;
+        resolve(value);
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      const preset = params.get('url') || params.get('slug') || params.get('q');
+      if (preset) {
+        input.value = preset;
+        resolve(preset);
+      }
+    })();
+  </script>
+</body>
+
+</html>
