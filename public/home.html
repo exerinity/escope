@@ -23,15 +23,9 @@
     <div class="grid">
       <section class="panel"><small id="welcome">Welcome to</small>
         <h1><span style="color: #6000ff">$</span> escope</h1>
-        <p>
-          <abbr style="cursor:help" title="Ephemeral Scoped Control of Persistent Endpoints"
-            onclick="alert('Ephemeral Scoped Control of Persistent Endpoints')">escope</abbr> is a service for creating
-          ephemeral, quick, self-destructing redirects ("scopes"). Creating a scope is simple: enter a URL to redirect
-          to, and a time for it to expire!
-        </p>
         <form id="targ" autocomplete="off">
           <label for="targu">target</label>
-          <input type="url" id="targu" name="url" placeholder="https://exerinity.com" required />
+          <input type="url" id="targu" name="url" required />
 
           <label for="ttr">minutes to expire (1-4320)</label>
           <input type="number" id="ttr" name="ttl" min="1" max="4320" value="5" required />
@@ -53,118 +47,14 @@
           <button type="submit" id="create-button">Create scope</button>
         </form>
         <div class="status" id="stat"></div>
-        <details>
-          <summary><span>About</span> <a class="summary-link" href="/about" target="_blank">Open in new tab</a>
-          </summary>
-          <div class="dropcontent">escope is a Cloudflare Worker, made with TypeScript. Scopes can last from 1 minute to
-            3 days (4320 minutes)
-            but
-            can be retracted early, if you made it. Upon the expiry time of the scope, it becomes inaccessible and
-            annulled.<br><br>Scopes are tied to your IP to prevent abuse and to enable management
-            of your own
-            scopes without any accounts.<br><br>Scopes are handled as KV entries and immediately processed with a fast
-            302
-            redirect.<br><br>
-            The premise is simple: enter a link, and how long that link should work, and optionally, a slug mode. Then,
-            share that link anywhere! But, ideally not everywhere... because, you know, it expires.<br><br>
-            When could escope be useful? Well, say, you just minted a fresh Virtual Machine, and you want to get the
-            exact file links for certain software, but clipboard access to your host doesn't work! Make a very
-            short-lived scope for it, and type it in on the VM! Or, another physical computer!<br><br>
-            escope is licensed under the MIT License. Source code is available on <a
-              href="https://github.com/exerinity/escope" target="_blank" rel="noopener noreferrer">GitHub</a>.
-          </div>
-        </details>
-        <details class="rules">
-          <summary><span>Rules</span><a class="summary-link" href="/rules" target="_blank">Open in new tab</a></summary>
-          <div class="dropcontent">
-            <h3>No extreme NSFW</h3>
-            <p>This includes but is <u style="color: red; cursor: help"
-                title="Violations can be beyond these hard rules">not
-                limited to</u>:</p>
-            <ul>
-              <li><abbr style="cursor: help"
-                  title="As in, videos of beheaded corpses bleeding out, stuff like that. Feel free to create links for gas station fight videos on Twitter.">heavy
-                  gore</abbr></li>
-              <li>sexualized depictions of minors, fictitious or not</li>
-              <li>revenge porn</li>
-            </ul>
-            <small>(This does not mean <i>no</i> NSFW)</small>
-            <h3>No cracks, malware or scams</h3>
-            <p>This includes but is <u style="color: red; cursor: help"
-                title="Violations can be beyond these hard rules">not
-                limited to</u>:</p>
-            <ul>
-              <li>game cheats and cracks</li>
-              <li>software cracks</li>
-              <li>heavily modified software</li>
-            </ul>
-            <h3>Avoid copyrighted content</h3>
-            <p>This is not a hard "don't do this", but avoid sharing links for things like Blu-Ray rips of full-length
-              movies.</p>
-            <h3>Please don't spam</h3>
-            <p>There are rate limits in place. If you are trying to abuse escope, you will be blacklisted indefinitely.
-            </p>
-          </div>
-        </details>
-        <details>
-          <summary><span>Privacy</span><a class="summary-link" href="/privacy" target="_blank">Open in new tab</a>
-          </summary>
-          <div class="dropcontent">
-            <h3>Overview</h3>
-            <h3>TL;DR</h3>
-            <p>
-              escope does not use or handle accounts, cookies, analytics, or ads. It stores the URL you submit and your
-              IP address
-              only to run the redirect, show your active scopes, and prevent abuse. Scopes automatically delete
-              themselves at expiry, and you can destroy them early at any time.
-            </p>
-            <ul>
-              <li>escope does not handle accounts, cookies, analytics, or ads</li>
-              <li>escope stores the target URL and your IP to operate the service and prevent abuse</li>
-              <li>Data lives in Cloudflare Workers KV and is removed when scopes expire</li>
-            </ul>
-
-            <h3>Data processed</h3>
-            <ul>
-              <li>Target URL you submit</li>
-              <li>A randomized slug</li>
-              <li>Timestamps: created and expires</li>
-              <li>Your IP address</li>
-            </ul>
-
-            <h3>How escope uses your data</h3>
-            <ul>
-              <li>Run redirects until expiry</li>
-              <li>Show "Your scopes" and allow early deletion (by your IP)</li>
-              <li>Prevent abuse, spam, and fraud</li>
-            </ul>
-
-            <h3>Storage and retention</h3>
-            <ul>
-              <li>Scopes self-destruct at the time you choose</li>
-              <li>A per-IP index of active slugs exists only while you have active scopes; it is deleted when empty</li>
-              <li>Cloudflare may process transient request metadata under their platform policies</li>
-            </ul>
-
-            <h3>Sharing and providers</h3>
-            <ul>
-              <li>escope runs on Cloudflare (Workers + KV). I do not sell any data or run ads</li>
-            </ul>
-
-            <h3>Security</h3>
-            <p>I minimize data collection and rely on Cloudflare's platform security. However, please do not use escope
-              for
-              sensitive data</p>
-
-            <h3>Your rights</h3>
-            <ul>
-              <li>Delete your scopes via the "Destroy" button</li>
-              <li>Contact: <a href="https://exerinity.com/email" target="_blank">exerinity.com/email</a></li>
-            </ul>
-          </div>
-        </details>
-        <p><span style="text-decoration: none;" class="report"><u>E</u>phemeral <u>S</u>coped <u>C</u>ontrol <u>O</u>f <u>P</u>ersistent <u>E</u>ndpoints</span><br><a class="report" href="/release_notes">v3</a> -
-          <a class="report" href="https://exerinity.com/projects/escope" target="_blank">About</a> -
+        <p class="page-links">
+          <a href="/about">About</a> -
+          <a href="/rules">Rules</a> -
+          <a href="/privacy">Privacy</a>
+        </p>
+        <p><span style="text-decoration: none;" class="report"><u>E</u>phemeral <u>S</u>coped <u>C</u>ontrol <u>O</u>f <u>P</u>ersistent <u>E</u>ndpoints</span><br><a class="report" href="/release_notes">v4</a> -
+          <a class="report" href="/resolve">Resolve</a> -
+          <a class="report" href="/about" target="_blank">About</a> -
           <a class="report" href="https://exerinity.com/" target="_blank">By exerinity</a> -
           <a class="report" href="https://exerinity.com/email" target="_blank">Contact</a>
         </p>
