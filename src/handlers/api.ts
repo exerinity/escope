@@ -1,6 +1,6 @@
 import { MIN_TTL_MINUTES, MAX_TTL_MINUTES } from '../constants';
 import { Env } from '../types';
-import { getClientIp, normalizeUrl, normalizeSlugMode, parseJsonBody, SlugMode } from '../utils';
+import { getClientIp, normalizeSlug, normalizeUrl, normalizeSlugMode, parseJsonBody, SlugMode } from '../utils';
 import { jsonError, jsonResponse } from '../responses';
 import { deleteRedirect, generateUniqueSlug, getRedirect, listActiveRedirects, saveRedirect } from '../storage';
 
@@ -106,6 +106,46 @@ export async function handleListLinks(request: Request, env: Env, baseUrl: URL):
     scope: `${baseUrl.origin}/${link.slug}`,
   }));
   return jsonResponse({ links: payload });
+}
+
+function extractSlug(input: string): string | null {
+  const raw = input.trim();
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(raw);
+    return normalizeSlug(parsed.pathname);
+  } catch {
+    return normalizeSlug(raw);
+  }
+}
+
+export async function handleResolveLink(request: Request, env: Env, baseUrl: URL): Promise<Response> {
+  const query = baseUrl.searchParams;
+  const input = query.get('slug') ?? query.get('url') ?? query.get('q') ?? '';
+  const slug = extractSlug(input);
+  if (!slug) {
+    return jsonError('Provide a scope slug or escope link to resolve', 400);
+  }
+
+  const record = await getRedirect(env, slug);
+  if (!record) {
+    return jsonError('No active scope found for that slug', 404);
+  }
+
+  if (Date.now() >= record.expiresAt) {
+    return jsonError('That scope has expired', 404);
+  }
+
+  return jsonResponse({
+    slug,
+    target: record.target,
+    scope: `${baseUrl.origin}/${slug}`,
+    finish: record.expiresAt,
+    made: record.createdAt,
+  });
 }
 
 export async function handleDeleteLink(request: Request, env: Env, slug: string): Promise<Response> {
