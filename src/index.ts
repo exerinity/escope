@@ -1,4 +1,4 @@
-import { handleCreateLink, handleDeleteLink, handleListLinks } from './handlers/api';
+import { handleCreateLink, handleDeleteLink, handleListLinks, handleResolveLink } from './handlers/api';
 import { handleRedirect } from './handlers/redirect';
 import { getBlockStatus, duringTempBlockRequest, hasCooldown, onRateLimited, setCooldown, getDailyCount, incrementDailyCount } from './rate_limit';
 import { corsHeaders, jsonError } from './responses';
@@ -59,6 +59,9 @@ export default {
       if (url.pathname === '/release_notes') {
         return serveAssetPage(env, request, '/release_notes.html');
       }
+      if (url.pathname === '/resolve') {
+        return serveAssetPage(env, request, '/resolve.html');
+      }
 
       const asset = await env.ASSETS.fetch(request);
       if (asset.status !== 404) {
@@ -87,6 +90,10 @@ export default {
 
     if (url.pathname === '/back/mine' && request.method === 'GET') {
       return handleListLinks(request, env, url);
+    }
+
+    if (url.pathname === '/back/resolve' && request.method === 'GET') {
+      return handleResolveLink(request, env, url);
     }
 
     if (url.pathname.startsWith('/back/scope/') && request.method === 'DELETE') {
