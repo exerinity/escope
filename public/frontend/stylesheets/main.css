@@ -49,13 +49,18 @@ main {
   background: #000;
   border: 1px solid #6000ff;
   border-radius: 20px;
-  padding: 24px;
+  padding: 28px;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   min-height: 0
 }
 
 .grid { align-items: stretch; }
+
+.panel > p {
+  margin: 0;
+  line-height: 1.5;
+}
 
 .result,
 form {
@@ -71,8 +76,26 @@ h2 {
 }
 
 form {
-  gap: 12px;
-  margin-top: 8px
+  gap: 0;
+  margin-top: 4px
+}
+
+form > label {
+  margin-top: 18px;
+  margin-bottom: 7px;
+}
+
+form > label:first-of-type {
+  margin-top: 0;
+}
+
+form > input,
+form > select {
+  margin: 0;
+}
+
+form > button {
+  margin-top: 22px;
 }
 
 label {
@@ -86,7 +109,9 @@ label[for="remember-slug-mode"] {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 18px;
+  margin-bottom: 0;
+  cursor: pointer;
 }
 
 #remember-slug-mode {
@@ -153,6 +178,11 @@ button:disabled {
   min-height: 18px
 }
 
+.status:empty {
+  min-height: 0;
+  margin: -9px 0;
+}
+
 .result {
   gap: 4px;
   font-size: .85rem
@@ -165,12 +195,27 @@ button:disabled {
   gap: 12px
 }
 
+.page-links {
+  font-size: .9rem;
+  letter-spacing: .02em;
+}
+
+.panel > p:last-child {
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(96, 0, 255, 0.3);
+}
+
 .report {
   font-size: .75rem;
   text-transform: uppercase;
   letter-spacing: .08em;
   color: #fff;
   text-decoration: underline dashed;
+}
+
+.report:not(a) {
+  color: #888;
 }
 
 a:hover {
