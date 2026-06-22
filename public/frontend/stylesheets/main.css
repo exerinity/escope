@@ -164,12 +164,64 @@ button, .button {
   padding: 12px 16px;
   border-radius: 12px;
   font-size: .95rem;
-  cursor: pointer
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.penis {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.icon-share {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  vertical-align: -5px;
+  margin-right: 6px;
+}
+
+.icon-share-x {
+  color: #1d9bf0;
+}
+
+.icon-share-email {
+  color: #6000ff;
+}
+
+.icon-share-facebook {
+  color: #1F67E5;
+}
+
+.icon-share-bluesky {
+  color: #1968E5;
 }
 
 button:disabled {
   opacity: .4;
   cursor: not-allowed
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: min(960px, 100%);
+}
+
+.alert-banner {
+  border: 1px solid #6000ff;
+  background: #1a0040;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: .85rem;
 }
 
 .status {
@@ -195,11 +247,6 @@ button:disabled {
   gap: 12px
 }
 
-.page-links {
-  font-size: .9rem;
-  letter-spacing: .02em;
-}
-
 .panel > p:last-child {
   margin-top: 6px;
   padding-top: 16px;
@@ -216,6 +263,11 @@ button:disabled {
 
 .report:not(a) {
   color: #888;
+}
+
+a {
+  color: #c9a7ff;
+  text-decoration: underline;
 }
 
 a:hover {
@@ -366,6 +418,14 @@ details[open] summary::before {
   height: 22px;
   display: block;
   fill: #fff
+}
+
+.icon-back {
+  width: .85em;
+  height: .85em;
+  vertical-align: -.05em;
+  fill: currentColor;
+  margin-right: 4px;
 }
 
 .countdown {
