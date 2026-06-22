@@ -20,12 +20,13 @@
 
 <body>
   <main>
-    <div class="grid">
+    <div class="page-stack">
+      <div class="grid">
       <section class="panel"><small id="welcome">Welcome to</small>
         <h1><span style="color: #6000ff">$</span> escope</h1>
         <form id="targ" autocomplete="off">
           <label for="targu">target</label>
-          <input type="url" id="targu" name="url" required />
+          <input id="targu" name="url" required />
 
           <label for="ttr">minutes to expire (1-4320)</label>
           <input type="number" id="ttr" name="ttl" min="1" max="4320" value="5" required />
@@ -44,19 +45,22 @@
             remember slug mode
           </label>
 
-          <button type="submit" id="create-button">Create scope</button>
+          <button type="submit" id="create-button">
+            <svg class="penis" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4 L12 20 M4 12 L20 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            Create scope
+          </button>
         </form>
         <div class="status" id="stat"></div>
-        <p class="page-links">
-          <a href="/about">About</a> -
-          <a href="/rules">Rules</a> -
-          <a href="/privacy">Privacy</a>
-        </p>
-        <p><span style="text-decoration: none;" class="report"><u>E</u>phemeral <u>S</u>coped <u>C</u>ontrol <u>O</u>f <u>P</u>ersistent <u>E</u>ndpoints</span><br><a class="report" href="/release_notes">v4</a> -
-          <a class="report" href="/resolve">Resolve</a> -
-          <a class="report" href="/about" target="_blank">About</a> -
+        <p><span style="text-decoration: none;" class="report"><u>E</u>phemeral <u>S</u>coped <u>C</u>ontrol <u>O</u>f <u>P</u>ersistent <u>E</u>ndpoints</span>
+          <br><a class="report" href="/release_notes">v5</a> -
+          <a class="report" href="/rules">Rules</a> -
+          <a class="report" href="/privacy">Privacy policy</a> -
+          <a class="report" href="/resolve">Resolve a scope</a>
+          <br><a class="report" href="/about">About escope</a> -
           <a class="report" href="https://exerinity.com/" target="_blank">By exerinity</a> -
-          <a class="report" href="https://exerinity.com/email" target="_blank">Contact</a>
+          <a class="report" href="https://exerinity.com/hello" target="_blank">contact</a>
         </p>
       </section>
       <section class="panel">
@@ -75,6 +79,10 @@
         </div>
         <ul class="lis" id="lis"></ul>
       </section>
+      </div>
+      <div class="alert-banner" role="alert">
+        <a href="https://github.com/exerinity/escope.cli" target="_blank">You can now use escope in a command line!</a> (arch: yay -S escope-git)
+      </div>
     </div>
   </main>
   <script src="/frontend/scripts/miscellaneous.js"></script>
