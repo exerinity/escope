@@ -14,7 +14,8 @@ export async function parseJsonBody<T>(request: Request): Promise<T | null> {
 
 export function normalizeUrl(value: string): string | null {
   try {
-    const parsed = new URL(value);
+    const candidate = /^https?:\/\//i.test(value) ? value : `http://${value}`;
+    const parsed = new URL(candidate);
     if (!['http:', 'https:'].includes(parsed.protocol)) {
       return null;
     }

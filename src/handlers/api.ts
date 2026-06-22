@@ -25,7 +25,7 @@ export async function handleCreateLink(request: Request, env: Env, baseUrl: URL,
 
   const normalizedUrl = normalizeUrl(rawUrl);
   if (!normalizedUrl) {
-    return jsonError('Destination URL must include http:// or https://', 400);
+    return jsonError('Destination URL is invalid', 400);
   }
 
   const lowerUrl = normalizedUrl.toLowerCase();
