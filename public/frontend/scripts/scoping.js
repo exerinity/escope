@@ -5,7 +5,7 @@ function buildShareUrls(url) {
   const emailBody = 'Check out this scope:\n' + safeUrl;
 
   return {
-    twitter: 'https://twitter.com/intent/tweet?' + new URLSearchParams({
+    twitter: 'https://x.com/intent/post?' + new URLSearchParams({
       text: tweetText,
       url: safeUrl,
     }).toString(),
@@ -28,7 +28,6 @@ function openShareModal(link) {
 
   const text = document.createElement('h2');
   text.textContent = 'Share this scope';
-  text.style.margin = '0 0 0.75rem 0';
 
   const leadingTo = document.createElement('p');
   leadingTo.style.margin = '0 0 0.75rem 0';
@@ -46,37 +45,36 @@ function openShareModal(link) {
   }
   leadingTo.appendChild(targetLink);
 
-  const scopeLink = document.createElement('a');
-  scopeLink.href = link.scope;
-  scopeLink.target = '_blank';
-  scopeLink.rel = 'noopener noreferrer';
-  scopeLink.textContent = truncate(String(link.scope || '').replace(/^https?:\/\//i, ''), 40);
-  scopeLink.style.display = 'inline-block';
-  scopeLink.style.marginBottom = '1rem';
-
   const actions = document.createElement('div');
   actions.style.display = 'grid';
   actions.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
   actions.style.gap = '10px';
 
-  function makeShareLink(label, href) {
+  const SHARE_ICONS = {
+    twitter: '<svg class="icon-share icon-share-x" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M459.4 151.7c.3 4.5 .3 9.1 .3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103l0-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53 51.7 63.7 129.3 105.3 216.4 109.8-1.6-7.8-2.6-15.9-2.6-24 0-57.8 46.8-104.9 104.9-104.9 30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3z"/></svg>',
+    bluesky: '<svg class="icon-share icon-share-bluesky" viewBox="0 0 576 512" aria-hidden="true"><path fill="currentColor" d="M407.8 294.7c-3.3-.4-6.7-.8-10-1.3 3.4 .4 6.7 .9 10 1.3zM288 227.1C261.9 176.4 190.9 81.9 124.9 35.3 61.6-9.4 37.5-1.7 21.6 5.5 3.3 13.8 0 41.9 0 58.4S9.1 194 15 213.9c19.5 65.7 89.1 87.9 153.2 80.7 3.3-.5 6.6-.9 10-1.4-3.3 .5-6.6 1-10 1.4-93.9 14-177.3 48.2-67.9 169.9 120.3 124.6 164.8-26.7 187.7-103.4 22.9 76.7 49.2 222.5 185.6 103.4 102.4-103.4 28.1-156-65.8-169.9-3.3-.4-6.7-.8-10-1.3 3.4 .4 6.7 .9 10 1.3 64.1 7.1 133.6-15.1 153.2-80.7 5.9-19.9 15-138.9 15-155.5s-3.3-44.7-21.6-52.9c-15.8-7.1-40-14.9-103.2 29.8-66.1 46.6-137.1 141.1-163.2 191.8z"/></svg>',
+    facebook: '<svg class="icon-share icon-share-facebook" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5l0-170.3-52.8 0 0-78.2 52.8 0 0-33.7c0-87.1 39.4-127.5 125-127.5 16.2 0 44.2 3.2 55.7 6.4l0 70.8c-6-.6-16.5-1-29.6-1-42 0-58.2 15.9-58.2 57.2l0 27.8 83.6 0-14.4 78.2-69.3 0 0 175.9C413.8 494.8 512 386.9 512 256z"/></svg>',
+    email: '<svg class="icon-share icon-share-email" viewBox="0 0 512 512" aria-hidden="true"><path fill="currentColor" d="M48 64c-26.5 0-48 21.5-48 48 0 15.1 7.1 29.3 19.2 38.4l208 156c17.1 12.8 40.5 12.8 57.6 0l208-156c12.1-9.1 19.2-23.3 19.2-38.4 0-26.5-21.5-48-48-48L48 64zM0 196L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-188-198.4 148.8c-34.1 25.6-81.1 25.6-115.2 0L0 196z"/></svg>',
+  };
+
+  function makeShareLink(icon, label, href) {
     const anchor = document.createElement('a');
     anchor.className = 'button';
     anchor.href = href;
     anchor.target = '_blank';
     anchor.rel = 'noopener noreferrer';
-    anchor.textContent = label;
+    anchor.innerHTML = SHARE_ICONS[icon] + label;
     return anchor;
   }
 
-  const twitterLink = makeShareLink('Tweet', urls.twitter);
-  const emailLink = makeShareLink('Email', urls.email);
-  const facebookLink = makeShareLink('Post to Facebook', urls.facebook);
-  const blueskyLink = makeShareLink('Post on Bluesky', urls.bluesky);
+  const twitterLink = makeShareLink('twitter', 'Twitter', urls.twitter);
+  const emailLink = makeShareLink('email', 'Email', urls.email);
+  const facebookLink = makeShareLink('facebook', 'Facebook', urls.facebook);
+  const blueskyLink = makeShareLink('bluesky', 'Bluesky', urls.bluesky);
 
   const mobileShare = document.createElement('button');
   mobileShare.type = 'button';
-  mobileShare.textContent = 'Trigger device share dialogue';
+  mobileShare.textContent = 'Trigger device share dialogue...';
   mobileShare.addEventListener('click', async () => {
     const url = String(link.scope || '');
     try {
@@ -96,14 +94,13 @@ function openShareModal(link) {
       }
 
       const orig = mobileShare.textContent;
+      mobileShare.disabled = 1;
       mobileShare.textContent = 'Unsupported, copied link instead';
-      setTimeout(() => { mobileShare.textContent = orig; }, 1500);
     } catch { }
   });
 
   content.appendChild(text);
   content.appendChild(leadingTo);
-  content.appendChild(scopeLink);
   content.appendChild(actions);
   actions.appendChild(twitterLink);
   actions.appendChild(emailLink);
@@ -153,7 +150,7 @@ async function loadLinks() {
     if (!res.ok) throw new Error(data.error || 'load failed');
 
     if (!data.links.length) {
-      setText(listTitle, null);
+      setText(listTitle, 'None!');
       return;
     }
 
